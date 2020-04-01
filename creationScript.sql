@@ -3,15 +3,21 @@ CREATE TABLE rules
 rule_type VARCHAR(10) NOT NULL,
 PRIMARY KEY (rule_id));
 
+GRANT ALL ON TABLE rules TO obore031;
+
 CREATE TABLE payment_type
 (payment_type_id SERIAL,
 payment_type VARCHAR(10) NOT NULL,
 PRIMARY KEY(payment_type_id));
 
+GRANT ALL ON TABLE payment_type TO obore031;
+
 CREATE TABLE address_type
 (address_type_id SERIAL, 
 address_type VARCHAR(18) NOT NULL,
 PRIMARY KEY(address_type_id));
+
+GRANT ALL ON TABLE address_type TO obore031;
 
 CREATE TABLE person_name
 (name_id SERIAL, 
@@ -20,25 +26,35 @@ middle_name VARCHAR(50),
 last_name VARCHAR(50) NOT NULL,
 PRIMARY KEY(name_id));
 
+GRANT ALL ON TABLE person_name TO obore031;
+
 CREATE TABLE amenity
 (amenity_id SERIAL, 
 amenity_type VARCHAR(10) NOT NULL,
 PRIMARY KEY(amenity_id));
+
+GRANT ALL ON TABLE amenity TO obore031;
 
 CREATE TABLE company_position 
 (position_id SERIAL, 
 position_type VARCHAR(16) NOT NULL,
 PRIMARY KEY (position_id));
 
+GRANT ALL ON TABLE company_position TO obore031;
+
 CREATE TABLE property_type
 (property_type_id SERIAL, 
 property_type VARCHAR(9) NOT NULL,
 PRIMARY KEY (property_type_id));
 
+GRANT ALL ON TABLE property_type TO obore031;
+
 CREATE TABLE room_type
 (room_type_id SERIAL, 
 room_type VARCHAR (15) NOT NULL,
 PRIMARY KEY (room_type_id));
+
+GRANT ALL ON TABLE room_type TO obore031;
 
 CREATE TABLE address
 (address_id SERIAL,
@@ -55,6 +71,8 @@ FOREIGN KEY (address_type_id) REFERENCES address_type (address_type_id)
  ON DELETE RESTRICT ON UPDATE CASCADE,
 CHECK (province IN ('NS', 'NB', 'PE', 'NL', 'QC', 'ON', 'MB', 
 					'SK', 'AB', 'BC', 'YK', 'NT', 'NU')));
+					
+GRANT ALL ON TABLE address TO obore031;
 
 CREATE TABLE host 
 (host_id SERIAL, 
@@ -71,6 +89,8 @@ FOREIGN KEY (name_id) REFERENCES person_name (name_id)
 CHECK (active IN('Y','N')),
 CHECK (email LIKE '%_@__%.__%'));
 
+GRANT ALL ON TABLE host TO obore031;
+
 CREATE TABLE guest
 (guest_id SERIAL, 
 address_id INT NOT NULL, 
@@ -83,6 +103,8 @@ FOREIGN KEY (address_id) REFERENCES address (address_id)
 FOREIGN KEY (name_ID) REFERENCES person_name (name_id) 
  ON DELETE RESTRICT ON UPDATE CASCADE,
 CHECK (email LIKE '%_@__%.__%'));
+
+GRANT ALL ON TABLE guest TO obore031;
 
 CREATE TABLE payment
 (payment_id SERIAL, 
@@ -100,19 +122,21 @@ FOREIGN KEY (payment_type_id) REFERENCES payment_type (payment_type_id)
  ON DELETE RESTRICT ON UPDATE CASCADE,
 CHECK (status IN ('Approved','Completed','Pending','Declined')));
 
+GRANT ALL ON TABLE payment TO obore031;
+
 CREATE TABLE property
 (property_id SERIAL, 
+property_name VARCHAR(20),
 host_id INT NOT NULL, 
 property_type_id INT NOT NULL,
 room_type_id INT NOT NULL, 
-bed_setup_id INT NOT NULL, 
 address_id INT NOT NULL, 
 guest_capacity INT NOT NULL, 
 num_bathrooms INT NOT NULL, 
 num_bedrooms INT NOT NULL, 
 next_available_date DATE NOT NULL,
 description VARCHAR(2000) NOT NULL,
-rate NUMERIC (4, 2) NOT NULL, 
+rate NUMERIC (7, 2) NOT NULL, 
 active VARCHAR(1) NOT NULL,
 image VARCHAR(20) NOT NULL,
 PRIMARY KEY (property_id),
@@ -126,6 +150,8 @@ FOREIGN KEY (address_id) REFERENCES address (address_id)
  ON DELETE RESTRICT ON UPDATE CASCADE,
 CHECK (active IN ('Y', 'N')));
 
+GRANT ALL ON TABLE property TO obore031;
+
 CREATE TABLE bed_setup
 (bed_setup_id SERIAL, 
 property_id INT NOT NULL,
@@ -135,6 +161,8 @@ PRIMARY KEY(bed_setup_id),
 FOREIGN KEY (property_id) REFERENCES property (property_id) 
  ON DELETE SET NULL ON UPDATE CASCADE,
 CHECK (bed_type IN ('Twin', 'Full', 'Queen', 'King')));
+
+GRANT ALL ON TABLE bed_setup TO obore031;
 
 CREATE TABLE review 
 (review_id SERIAL, 
@@ -154,6 +182,8 @@ CHECK (communication_rating > 0 AND communication_rating <= 5),
 CHECK (clean_rating > 0 AND clean_rating <= 5),
 CHECK (value_rating > 0 and value_rating <=5));
 
+GRANT ALL ON TABLE review TO obore031;
+
 CREATE TABLE rental_agreement 
 (agreement_id SERIAL, 
 property_id INT NOT NULL, 
@@ -171,6 +201,8 @@ FOREIGN KEY (guest_id) REFERENCES guest (guest_id)
  ON DELETE SET NULL ON UPDATE CASCADE,
 FOREIGN KEY (host_id) REFERENCES host (host_id) 
  ON DELETE SET NULL ON UPDATE CASCADE);
+ 
+GRANT ALL ON TABLE rental_agreement TO obore031;
 
 CREATE TABLE branch
 (branch_id SERIAL, 
@@ -180,6 +212,8 @@ address_id INT NOT NULL,
 PRIMARY KEY (branch_id),
 FOREIGN KEY (address_id) REFERENCES address (address_id) 
  ON DELETE RESTRICT ON UPDATE CASCADE);
+ 
+GRANT ALL ON TABLE branch TO obore031;
 
 CREATE TABLE employee 
 (employee_id SERIAL, 
@@ -196,6 +230,8 @@ FOREIGN KEY (name_id) REFERENCES person_name (name_id)
 FOREIGN KEY (position_id) REFERENCES company_position (position_id) 
  ON DELETE RESTRICT ON UPDATE CASCADE);
  
+GRANT ALL ON TABLE employee TO obore031;
+ 
 ALTER TABLE branch ADD CONSTRAINT branch_manager_fkey
 FOREIGN KEY (branch_manager) REFERENCES employee (employee_id) 
 ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -209,6 +245,8 @@ FOREIGN KEY (property_id) REFERENCES property (property_id)
  ON DELETE CASCADE ON UPDATE CASCADE,
 FOREIGN KEY (rule_id) REFERENCES rules (rule_id) 
  ON UPDATE CASCADE ON DELETE CASCADE);
+ 
+GRANT ALL ON TABLE property_rules TO obore031;
 
 CREATE TABLE property_amenities 
 (property_amenity_id SERIAL,
@@ -219,3 +257,5 @@ FOREIGN KEY (property_id) REFERENCES property (property_id)
  ON DELETE CASCADE ON UPDATE CASCADE,
 FOREIGN KEY (amenity_id) REFERENCES amenity (amenity_id) 
  ON DELETE CASCADE ON UPDATE CASCADE);
+ 
+GRANT ALL ON TABLE property_amenities TO obore031;

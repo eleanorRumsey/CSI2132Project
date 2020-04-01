@@ -1,0 +1,78 @@
+body {
+    background-color: #235C44;
+    padding: 20px;
+}
+
+h1 {
+    color: #FFFDD8;
+}
+
+h3 {
+    color: #235C44;
+    font-size: 24px;
+    margin-bottom: 0;
+}
+
+h5 {
+    color: #737373;
+    font-size: 12px;
+    font-weight: normal;
+    margin: 0;
+}
+
+.page {
+    display: flex;
+    flex-direction: row;
+}
+
+.header {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 2em;
+    justify-content: space-between;
+}
+
+.main-container {
+    background-color: white;
+    width: 100%;
+    border-radius: 15px;
+    padding: 1.5em;
+}
+
+.nav-link {
+    width: 10em;
+    background-color: #FFFDD8;
+    margin: 0 1em 1em -2em;
+    padding-left: 2em;
+    border-radius: 15px;
+    color: #235C44;
+}
+
+.property {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 2em;
+}
+
+.property-image {
+    max-width: 200px;
+}
+
+.property-info {
+    display: flex;
+    flex-direction: column;
+    margin-left: 1em;
+    justify-content: space-between;
+}
+
+.image-desc {
+    display: flex;
+    flex-direction: row;
+}
+
+.address-date {
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+}

@@ -159,7 +159,7 @@ bed_type VARCHAR(5) NOT NULL,
 num_of_beds INT NOT NULL,
 PRIMARY KEY(bed_setup_id),
 FOREIGN KEY (property_id) REFERENCES property (property_id) 
- ON DELETE SET NULL ON UPDATE CASCADE,
+ ON DELETE CASCADE ON UPDATE CASCADE,
 CHECK (bed_type IN ('Twin', 'Full', 'Queen', 'King')));
 
 GRANT ALL ON TABLE bed_setup TO obore031;

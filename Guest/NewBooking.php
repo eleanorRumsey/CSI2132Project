@@ -75,6 +75,10 @@
         }
     }
 
+    $doc_link = "https://docs.google.com/document/d/1WjeVaITTmj7MrJcuwJwEFEogbVrSPb5332LHaNLaba8/edit?usp=sharing";
+
+
+
     session_destroy();
 ?>
 <html>
@@ -94,7 +98,7 @@
                 <a class="nav-link" href="#">Current Bookings</a>
                 <a class="nav-link" href="#">Past Bookings</a>
             </nav>
-            <div class="main-container">
+            <form class="main-container">
                 <h3>Booking</h3>
                 <?php
                     echo '<div class="property">
@@ -120,7 +124,16 @@
                     </div>
                   </div>';
                 ?>
-            </div>
+                <div>Start date: <input type="text" class="form-control" placeholder="yyyy-mm-dd" name="start-date"></div>
+                <div>End date: <input type="text" class="form-control" placeholder="yyyy-mm-dd" name="end-date"></div>
+                <a href="https://docs.google.com/document/d/1WjeVaITTmj7MrJcuwJwEFEogbVrSPb5
+                            332LHaNLaba8/edit?usp=sharing" target="_blank">Agreement Document</a>
+                <div class="form-group form-check">
+                    <input type="checkbox" class="form-check-input" name="agreed">
+                    <div class="form-check-label">I agree</div>
+                </div>
+                <input type="submit" class="btn btn-primary" name="book" value="Book now"/>
+            </form>
         </div>
     </body>
 </html>

@@ -96,7 +96,7 @@ CREATE TABLE guest
 address_id INT NOT NULL, 
 name_id INT NOT NULL, 
 email VARCHAR(100) NOT NULL,
-phone_number INT NOT NULL,
+phone_number VARCHAR(15),
 PRIMARY KEY (guest_id),
 FOREIGN KEY (address_id) REFERENCES address (address_id) 
  ON DELETE RESTRICT ON UPDATE CASCADE,

@@ -1,12 +1,10 @@
 <?php
-    session_start();
-
     $conn_string = "host=web0.eecs.uottawa.ca port = 15432 dbname=group_147 user=erums071 password = <password>";
     $dbh = pg_connect($conn_string) or die ('Connection failed.');
 
-    // These will be replaced with session variables later
     $guest_id = 2;
-    $property_id = 1;
+    $property_id = $_GET["property-id"];
+    print_r($property_id);
     
     $property_sql = "SELECT property_id, property_name, property_type_id, room_type_id, address_id, guest_capacity, num_bathrooms, num_bedrooms, 
                         next_available_date, description, rate, active, image FROM property where property_id = $1";
@@ -80,11 +78,21 @@
 
     $output = '';
 
+    $nights = 0;
+
     if(isset($_POST['book'])){
+        $start_date = $_POST['start-date-y'] . "-" . $_POST['start-date-m'] . "-" . $_POST['start-date-d'];
+        $end_date = $_POST['end-date-y'] . "-" . $_POST['end-date-m'] . "-" . $_POST['end-date-d'];
 
-        $start_date = $_POST['start-date'];
+        $year_diff = $_POST['end-date-y'] - $_POST['start-date-y'];
+        print_r($year_diff);
 
-        $end_date = $_POST['end-date'];
+        $month_diff = $_POST['end-date-m'] - $_POST['start-date-m'];
+        print_r($month_diff);
+
+        $day_diff = $_POST['end-date-d'] - $_POST['start-date-d'];
+        print_r($day_diff);
+
         $agreed = isset($_POST['agreed']);
 
         if(!empty($start_date) && !empty($end_date) && $agreed){
@@ -105,15 +113,12 @@
                 die("Error in SQL query:" .pg_last_error());
             }
             pg_free_result($date_result);
-
-            header('Location: PastBookings.php');
         }
         else {
             $output = 'All fields are mandatory';
         }
     }
 
-    session_destroy();
 ?>
 <html>
     <head>
@@ -132,7 +137,7 @@
                 <a class="nav-link" href="#">Current Bookings</a>
                 <a class="nav-link" href="#">Past Bookings</a>
             </nav>
-            <form class="main-container" method="post" action="">
+            <form class="main-container" method="post" action="Payment.php">
                 <h3>Booking</h3>
                 <?php
                     echo '<div class="property">
@@ -158,17 +163,73 @@
                     </div>
                   </div>';
                 ?>
-                <div>Start date: <input type="text" class="form-control" placeholder="yyyy-mm-dd" name="start-date"></div>
-                <div>End date: <input type="text" class="form-control" placeholder="yyyy-mm-dd" name="end-date"></div>
+                <div class="input-group">
+                    Start date: 
+                    <select class="form-control" name="start-date-y">
+                        <option value="2020">2020</option>
+                        <option value="2021">2021</option>
+                        <option value="2022">2022</option>
+                    </select>
+                    <select class="form-control" name="start-date-m">
+                        <option value="1">Jan</option>
+                        <option value="2">Feb</option>
+                        <option value="3">Mar</option>
+                        <option value="4">Apr</option>
+                        <option value="5">May</option>
+                        <option value="6">Jun</option>
+                        <option value="7">Jul</option>
+                        <option value="8">Aug</option>
+                        <option value="9">Sep</option>
+                        <option value="10">Oct</option>
+                        <option value="11">Nov</option>
+                        <option value="12">Dec</option>
+                    </select>
+                    <select class="form-control" name="start-date-d">
+                        <?php
+                            for ($d = 1; $d <= 31; $d ++){
+                                echo '<option value="'.$d.'">'.$d.'</option>';
+                            }
+                        ?>
+                    </select>
+                </div>
+                <div class="input-group">
+                    End date: 
+                    <select class="form-control" name="end-date-y">
+                        <option value="2020">2020</option>
+                        <option value="2021">2021</option>
+                        <option value="2022">2022</option>
+                    </select>
+                    <select class="form-control" name="end-date-m">
+                        <option value="1">Jan</option>
+                        <option value="2">Feb</option>
+                        <option value="3">Mar</option>
+                        <option value="4">Apr</option>
+                        <option value="5">May</option>
+                        <option value="6">Jun</option>
+                        <option value="7">Jul</option>
+                        <option value="8">Aug</option>
+                        <option value="9">Sep</option>
+                        <option value="10">Oct</option>
+                        <option value="11">Nov</option>
+                        <option value="12">Dec</option>
+                    </select>
+                    <select class="form-control" name="end-date-d">
+                        <?php
+                            for ($d = 1; $d <= 31; $d ++){
+                                echo '<option value="'.$d.'">'.$d.'</option>';
+                            }
+                        ?>
+                    </select>
+                </div>
                 <a href="https://docs.google.com/document/d/1WjeVaITTmj7MrJcuwJwEFEogbVrSPb5332LHaNLaba8/edit?usp=sharing" target="_blank">Agreement Document</a>
                 <div class="form-group form-check">
                     <input type="checkbox" class="form-check-input" name="agreed">
                     <div class="form-check-label">I agree</div>
                 </div>
-                <input type="submit" class="btn btn-primary" name="book" value="Book now"/>
                 <?php
-                    echo '<div>'. $output .'</div>';
+                    echo '<input type="hidden" name="property-id" value="'. $property_id .'">';
                 ?>
+                <input type="submit" class="btn btn-primary" name="book" value="Continue to payment"/>
             </form>
         </div>
         <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>

@@ -1,6 +1,6 @@
 <?php
     session_start();
-    $conn_string = "host=web0.eecs.uottawa.ca port = 15432 dbname=group_147 user=erums071 password = Chs22745er";
+    $conn_string = "host=web0.eecs.uottawa.ca port = 15432 dbname=group_147 user=erums071 password = <password>";
     $dbh = pg_connect($conn_string) or die ('Connection failed.');
 
     $rules_stmt = pg_prepare($dbh, "rst", "SELECT rule_id, rule_type FROM rules");
@@ -157,95 +157,95 @@
             </nav>
             <div class="main-container">
                 <form id="new-property-form" name="property-form" method="post" action="">
-                <h3>New property</h3>
-                <div>Name: <input type="text" class="form-control" name="p-name"></div>
-                <div>
-                    Property type:                 
-                    <select class="form-control" id="select_1" name="p-type">
-                        <option value="Apartment">Apartment</option>
-                        <option value="House">House</option>
-                        <option value="Cottage">Cottage</option>
-                        <option value="Loft">Loft</option>
-                        <option value="Campsite">Campsite</option>
-                    </select>
-                </div>
-                <div>
-                    Room type:
-                    <select class="form-control" id="select_2" name="room-type">
-                        <option value="Entire property">Entire property</option>
-                        <option value="Private room">Private room</option>
-                        <option value="Shared room">Shared room</option>
-                    </select>
-                </div>
-                <div>
-                    Address: 
-                    <div>Unit: <input type="text" class="form-control" name="unit"/></div>
-                    <div>Street number: <input type="text" class="form-control" name="street-number"/></div>
-                    <div>Street name: <input type="text" class="form-control" name="street-name"/></div>
-                    <div>City: <input type="text" class="form-control" name="city"/></div>
-                    <div>Province/State: 
-                        <select class="form-control" id="select_3" name="province">
-                            <option value="AB">AB</option>
-                            <option value="BC">BC</option>
-                            <option value="MB">MB</option>
-                            <option value="NB">NB</option>
-                            <option value="NL">NL</option>
-                            <option value="NS">NS</option>
-                            <option value="NT">NT</option>
-                            <option value="NU">NU</option>
-                            <option value="ON">ON</option>
-                            <option value="PE">PE</option>
-                            <option value="QC">QC</option>
-                            <option value="SK">SK</option>
-                            <option value="YK">YK</option>
+                    <h3>New property</h3>
+                    <div>Name: <input type="text" class="form-control" name="p-name"></div>
+                    <div>
+                        Property type:                 
+                        <select class="form-control" id="select_1" name="p-type">
+                            <option value="Apartment">Apartment</option>
+                            <option value="House">House</option>
+                            <option value="Cottage">Cottage</option>
+                            <option value="Loft">Loft</option>
+                            <option value="Campsite">Campsite</option>
                         </select>
                     </div>
                     <div>
-                        Country: 
-                        <select class="form-control" id="select_4" name="country">
-                            <option value="Canada">Canada</option>
-                            <option value="United States">United States</option>
+                        Room type:
+                        <select class="form-control" id="select_2" name="room-type">
+                            <option value="Entire property">Entire property</option>
+                            <option value="Private room">Private room</option>
+                            <option value="Shared room">Shared room</option>
                         </select>
                     </div>
-                    <div>Postal code: <input type="text" class="form-control" name="postal-code"/></div>
-                </div>
-                <div>Guest capacity: <input type="number" class="form-control" name="capacity"></div>
-                <div>Number of bathrooms: <input type="number" class="form-control" name="bathrooms"></div>
-                <div>Number of bedrooms: <input type="number" class="form-control" name="bedrooms"></div>
-                <div>Next available date: 
-                    <input type="text" class="form-control" placeholder="yyyy-mm-dd" name="date"></div>
-                <div>Description: <textarea class="form-control" rows="3" name="description"></textarea></div>
-                <div>Rate: <input type="number" class="form-control" name="rate"></div>
-                <div>Image: <input type="text" class="form-control" placeholder="File name" name="image"></div>
-                <div>
-                    Bed setup: 
-                    <div>King: <input type="number" class="form-control" name="num_king"></div>
-                    <div>Queen: <input type="number" class="form-control" name="num_queen"></div>
-                    <div>Full: <input type="number" class="form-control" name="num_full"></div>
-                    <div>Twin: <input type="number" class="form-control" name="num_twin"></div>
-                </div>
-                <div>
-                    Rules: 
-                    <?php
-                        foreach($rules as $rule){
-                            echo '<div class="form-group form-check">
-                                    <input type="checkbox" class="form-check-input" name="'.$rule['rule_id'].'-rule">
-                                    <div class="form-check-label">'. $rule['rule_type'] .'</div>
-                                </div>';
-                        }
-                    ?>
-                </div>
-                <div>
-                    Amenities: 
-                    <?php
-                        foreach($amenities as $amenity){
-                            echo '<div class="form-group form-check">
-                                    <input type="checkbox" class="form-check-input" name="'.$amenity['amenity_id'].'-amenity">
-                                    <div class="form-check-label">'. $amenity['amenity_type'] .'</div>
-                                 </div>';
-                        }
-                    ?>
-                </div>
+                    <div>
+                        Address: 
+                        <div>Unit: <input type="text" class="form-control" name="unit"/></div>
+                        <div>Street number: <input type="text" class="form-control" name="street-number"/></div>
+                        <div>Street name: <input type="text" class="form-control" name="street-name"/></div>
+                        <div>City: <input type="text" class="form-control" name="city"/></div>
+                        <div>Province/State: 
+                            <select class="form-control" id="select_3" name="province">
+                                <option value="AB">AB</option>
+                                <option value="BC">BC</option>
+                                <option value="MB">MB</option>
+                                <option value="NB">NB</option>
+                                <option value="NL">NL</option>
+                                <option value="NS">NS</option>
+                                <option value="NT">NT</option>
+                                <option value="NU">NU</option>
+                                <option value="ON">ON</option>
+                                <option value="PE">PE</option>
+                                <option value="QC">QC</option>
+                                <option value="SK">SK</option>
+                                <option value="YK">YK</option>
+                            </select>
+                        </div>
+                        <div>
+                            Country: 
+                            <select class="form-control" id="select_4" name="country">
+                                <option value="Canada">Canada</option>
+                                <option value="United States">United States</option>
+                            </select>
+                        </div>
+                        <div>Postal code: <input type="text" class="form-control" name="postal-code"/></div>
+                    </div>
+                    <div>Guest capacity: <input type="number" class="form-control" name="capacity"></div>
+                    <div>Number of bathrooms: <input type="number" class="form-control" name="bathrooms"></div>
+                    <div>Number of bedrooms: <input type="number" class="form-control" name="bedrooms"></div>
+                    <div>Next available date: 
+                        <input type="text" class="form-control" placeholder="yyyy-mm-dd" name="date"></div>
+                    <div>Description: <textarea class="form-control" rows="3" name="description"></textarea></div>
+                    <div>Rate: <input type="number" class="form-control" name="rate"></div>
+                    <div>Image: <input type="text" class="form-control" placeholder="File name" name="image"></div>
+                    <div>
+                        Bed setup: 
+                        <div>King: <input type="number" class="form-control" name="num_king"></div>
+                        <div>Queen: <input type="number" class="form-control" name="num_queen"></div>
+                        <div>Full: <input type="number" class="form-control" name="num_full"></div>
+                        <div>Twin: <input type="number" class="form-control" name="num_twin"></div>
+                    </div>
+                    <div>
+                        Rules: 
+                        <?php
+                            foreach($rules as $rule){
+                                echo '<div class="form-group form-check">
+                                        <input type="checkbox" class="form-check-input" name="'.$rule['rule_id'].'-rule">
+                                        <div class="form-check-label">'. $rule['rule_type'] .'</div>
+                                    </div>';
+                            }
+                        ?>
+                    </div>
+                    <div>
+                        Amenities: 
+                        <?php
+                            foreach($amenities as $amenity){
+                                echo '<div class="form-group form-check">
+                                        <input type="checkbox" class="form-check-input" name="'.$amenity['amenity_id'].'-amenity">
+                                        <div class="form-check-label">'. $amenity['amenity_type'] .'</div>
+                                    </div>';
+                            }
+                        ?>
+                    </div>
                     <input type="submit" class="btn btn-primary" name="create"/>
                 </form>
             </div>

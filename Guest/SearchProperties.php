@@ -1,7 +1,5 @@
 <?php
-    session_start();
-
-    $conn_string = "host=web0.eecs.uottawa.ca port = 15432 dbname=group_147 user=erums071 password = Chs22745er";
+    $conn_string = "host=web0.eecs.uottawa.ca port = 15432 dbname=group_147 user=erums071 password = <password>";
     $dbh = pg_connect($conn_string) or die ('Connection failed.');
 
     $host_id = 1;
@@ -19,6 +17,7 @@
 			$output = 'There were no search results. Try searching something else.';
 		}else{
 			while($row = pg_fetch_array($query)){
+				$propertyID = $row['property_id'];
 				$propertyName = $row['property_name'];
 				$guestCapacity = $row['guest_capacity'];
 				$numBath = $row['num_bathrooms'];
@@ -30,7 +29,20 @@
 				$propertyTypeID = $row['property_type_id'];
 				$addressID = $row['address_id'];
 				
-				//$output .= '<div> '.$propertyName.' '.$guestCapacity.' '.$numBath.' '.$numBed.' '.$nextAvail.' '.$rate.' '.$image.'</div>';
+				$output .= '<div class="property">
+								<div class="image-desc">
+									<img src = "'."../Images/".$image.'" class="property-image"/>
+									<div class="property-info">
+										<h2>'. $propertyName .' on '.$streetName.' in '.$city.'</h2>
+										<h3>$'. $rate .'/night</h3>
+										<h6>'.$description.'</h6>
+										<div> Next available date: '. $nextAvail .'</div>
+										<div>'.$propertyType.' with '. $numBed.' bedroom, '. $numBath .' bathroom</div>
+										<div></div>
+										<div> Maximum number of guests: '. $guestCapacity .'</div>
+									</div>
+								</div>
+							</div>';
 			}
 		}
 		
@@ -49,6 +61,13 @@
 			}
 		}
 	}
+
+	// $_SESSION["property-id"] = $propertyID;
+
+	// if(isset($_POST['book-property'])){
+	// 	print_r("PROPERTY: " . $_SESSION["property-id"]);
+	// 	// header("Location: NewBooking.php");
+	// }
      
 ?>
 <html>
@@ -73,40 +92,18 @@
                 <form action="SearchProperties.php" method="post">
 					<input type="text" name="citySearch" placeholder="Search by City"/>
 					<input type="submit" value=">>"/>
-				
 				</form>
 				<?php 
-				
-				if($count == 0){
-					print("$output");
-				}else{
-					echo '<div class="property">
-									<div class="image-desc">
-									
-										<img src = "'."../Images/".$image.'" class="property-image"/>
-										<div class="property-info">
-											<h2>'. $propertyName .' on '.$streetName.' in '.$city.'</h2>
-											<h3>$'. $rate .'/night</h3>
-											<h6>'.$description.'</h6>
-											<div> Next available date: '. $nextAvail .'</div>
-											<div>'.$propertyType.' with '. $numBed.' bedroom, '. $numBath .' bathroom</div>
-											<div></div>
-											<div> Maximum number of guests: '. $guestCapacity .'</div>
-										</div>
-						
-									</div>
-									<div>
-										
-										
-										<button type="button" class="btn btn-light" style="position:absolute; right:10%; top:50%;background-color:#86b3a0;">Book Now!</button>
-									</div>
-						</div>'
-				;
-				}
+					echo $output;
 				?>
+				<form method="get" action="NewBooking.php">
+					<?php
+						echo '<input type="hidden" name="property-id" value="'. $propertyID.'">';
+					?>
+					<button type="submit" class="btn btn-light" name="book-property" style="position:absolute; right:10%; top:50%;background-color:#86b3a0;">Book Now!</button>
+				</form>
             </div>
         </div>
-		
         <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>

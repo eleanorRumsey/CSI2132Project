@@ -5,7 +5,7 @@
     $dbh = pg_connect($conn_string) or die ('Connection failed.');
 
     // These will be replaced with session variables later
-    $guest_id = 1;
+    $guest_id = 2;
     $property_id = 1;
     
     $property_sql = "SELECT property_id, property_name, property_type_id, room_type_id, address_id, guest_capacity, num_bathrooms, num_bedrooms, 
@@ -76,8 +76,42 @@
     }
 
     $doc_link = "https://docs.google.com/document/d/1WjeVaITTmj7MrJcuwJwEFEogbVrSPb5332LHaNLaba8/edit?usp=sharing";
+    $today = date("Y-m-d");
 
+    $output = '';
 
+    if(isset($_POST['book'])){
+
+        $start_date = $_POST['start-date'];
+
+        $end_date = $_POST['end-date'];
+        $agreed = isset($_POST['agreed']);
+
+        if(!empty($start_date) && !empty($end_date) && $agreed){
+
+            $insert_agreement = "INSERT INTO rental_agreement (property_id, guest_id, host_id, document_link, signed, 
+                                    signing_date, start_date, end_date) VALUES ($property_id, $guest_id, $host_id, '$doc_link',
+                                    TRUE,  '$today', '$start_date', '$end_date')";
+            $agreement_result = pg_query($dbh, $insert_agreement);
+            if(!$agreement_result){
+                die("Error in SQL query:" .pg_last_error());
+            }
+            pg_free_result($agreement_result);
+
+            //update property's next available date to the end date of this booking (not a perfect solution)
+            $update_date = "UPDATE property SET next_available_date = '$end_date' WHERE property_id = $property_id";
+            $date_result = pg_query($dbh, $update_date);
+            if(!$date_result){
+                die("Error in SQL query:" .pg_last_error());
+            }
+            pg_free_result($date_result);
+
+            header('Location: PastBookings.php');
+        }
+        else {
+            $output = 'All fields are mandatory';
+        }
+    }
 
     session_destroy();
 ?>
@@ -98,7 +132,7 @@
                 <a class="nav-link" href="#">Current Bookings</a>
                 <a class="nav-link" href="#">Past Bookings</a>
             </nav>
-            <form class="main-container">
+            <form class="main-container" method="post" action="">
                 <h3>Booking</h3>
                 <?php
                     echo '<div class="property">
@@ -126,14 +160,19 @@
                 ?>
                 <div>Start date: <input type="text" class="form-control" placeholder="yyyy-mm-dd" name="start-date"></div>
                 <div>End date: <input type="text" class="form-control" placeholder="yyyy-mm-dd" name="end-date"></div>
-                <a href="https://docs.google.com/document/d/1WjeVaITTmj7MrJcuwJwEFEogbVrSPb5
-                            332LHaNLaba8/edit?usp=sharing" target="_blank">Agreement Document</a>
+                <a href="https://docs.google.com/document/d/1WjeVaITTmj7MrJcuwJwEFEogbVrSPb5332LHaNLaba8/edit?usp=sharing" target="_blank">Agreement Document</a>
                 <div class="form-group form-check">
                     <input type="checkbox" class="form-check-input" name="agreed">
                     <div class="form-check-label">I agree</div>
                 </div>
                 <input type="submit" class="btn btn-primary" name="book" value="Book now"/>
+                <?php
+                    echo '<div>'. $output .'</div>';
+                ?>
             </form>
         </div>
+        <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
     </body>
 </html>

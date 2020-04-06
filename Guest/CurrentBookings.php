@@ -1,7 +1,7 @@
 <?php
     session_start();
 
-    $conn_string = "host=web0.eecs.uottawa.ca port = 15432 dbname=group_147 user=erums071 password = <password>";
+    $conn_string = "host=web0.eecs.uottawa.ca port = 15432 dbname=group_147 user=<user> password = <password>";
     $dbh = pg_connect($conn_string) or die ('Connection failed.');
 
     $host_id = 1;
@@ -60,7 +60,7 @@
     <body>
         <div class="header"> 
             <h1>Propertly.</h1>
-            <button type="button" class="btn btn-light">Log out</button>
+            <button type="button" class="btn btn-light" onclick="window.location.href = '../Login/Logout.php';">Log out</button>
         </div>
         <div class="page">
             <nav class="nav flex-column">

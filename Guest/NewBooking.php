@@ -1,15 +1,13 @@
 <?php
+    session_start();
     $conn_string = "host=web0.eecs.uottawa.ca port = 15432 dbname=group_147 user=<user> password = <password>";
     $dbh = pg_connect($conn_string) or die ('Connection failed.');
 
-    $guest_id = 2;
+    $guest_id = $_SESSION['user_id'];
     $property_id = $_GET["property-id"];
-    print_r($property_id);
     
-    $property_sql = "SELECT property_id, property_name, property_type_id, room_type_id, address_id, guest_capacity, num_bathrooms, num_bedrooms, 
-                        next_available_date, description, rate, active, image FROM property where property_id = $1";
-    $property_stmt = pg_prepare($dbh, "ps", $property_sql);
-    $property_result = pg_execute($dbh, "ps", array($property_id));
+    $property_result = pg_query("SELECT property_id, property_name, property_type_id, room_type_id, address_id, guest_capacity, num_bathrooms, num_bedrooms, 
+                                    next_available_date, description, rate, active, image FROM property where property_id = $property_id");
     if(!$property_result){
         die("Error in SQL query:" .pg_last_error());
     }
@@ -17,34 +15,22 @@
 
     $img_path = "../Images/" . $property[12];
 
-    $property_type_sql = "SELECT property_type FROM property_type WHERE property_type_id = $1";
-    $p_type_stmt = pg_prepare($dbh, "pts", $property_type_sql);
-    $p_type_result = pg_execute($dbh, "pts", array($property_id)); 
+    $p_type_result = pg_query("SELECT property_type FROM property_type WHERE property_type_id = $property[2]");
     $p_type = pg_fetch_row($p_type_result)[0];
 
-    $room_type_sql = "SELECT room_type FROM room_type WHERE room_type_id = $1";
-    $r_type_stmt = pg_prepare($dbh, "rts", $room_type_sql);
-    $r_type_result = pg_execute($dbh, "rts", array($property[2]));
+    $r_type_result = pg_query("SELECT room_type FROM room_type WHERE room_type_id = $property[2]");
     $r_type = pg_fetch_row($r_type_result)[0];
     
-    $p_address_sql = "SELECT unit, street_number, street_name, city, province, country, postal_code FROM address WHERE address_id =$1";
-    $p_address_stmt = pg_prepare($dbh, "pas", $p_address_sql);
-    $p_address_result = pg_execute($dbh, "pas", array($property[4]));
+    $p_address_result = pg_query("SELECT unit, street_number, street_name, city, province, country, postal_code FROM address WHERE address_id =$property[4]");
     $p_address = pg_fetch_row($p_address_result);
     
-    $beds_sql = "SELECT bed_type, num_of_beds FROM bed_setup WHERE property_id = $1";
-    $beds_stmt = pg_prepare($dbh, "bs", $beds_sql);
-    $beds_result = pg_execute($dbh, "bs", array($property_id));
+    $beds_result = pg_query("SELECT bed_type, num_of_beds FROM bed_setup WHERE property_id = $property_id");
     $beds = pg_fetch_all($beds_result);
     
-    $rules_sql = "SELECT rule_type FROM rules WHERE rule_id IN (SELECT rule_id FROM property_rules WHERE property_id = $1)";
-    $rules_stmt = pg_prepare($dbh, "rs", $rules_sql);
-    $rules_result = pg_execute($dbh, "rs", array($property_id));
+    $rules_result = pg_query("SELECT rule_type FROM rules WHERE rule_id IN (SELECT rule_id FROM property_rules WHERE property_id = $property_id)");
     $rules = pg_fetch_all($rules_result);                     
                         
-    $host_sql = "SELECT host_id FROM property WHERE property_id = $1";
-    $host_stmt = pg_prepare($dbh, "hs", $host_sql);
-    $host_result = pg_execute($dbh, "hs", array($property_id));
+    $host_result = pg_query("SELECT host_id FROM property WHERE property_id = $property_id");
     if(!$host_result){
         die("Error in SQL query:" .pg_last_error());
     }
@@ -77,30 +63,26 @@
     $today = date("Y-m-d");
 
     $output = '';
+    $num_nights = 0;
 
-    $nights = 0;
+    $_SESSION['property_id'] = $property_id;
 
     if(isset($_POST['book'])){
         $start_date = $_POST['start-date-y'] . "-" . $_POST['start-date-m'] . "-" . $_POST['start-date-d'];
         $end_date = $_POST['end-date-y'] . "-" . $_POST['end-date-m'] . "-" . $_POST['end-date-d'];
 
         $year_diff = $_POST['end-date-y'] - $_POST['start-date-y'];
-        print_r($year_diff);
-
         $month_diff = $_POST['end-date-m'] - $_POST['start-date-m'];
-        print_r($month_diff);
-
         $day_diff = $_POST['end-date-d'] - $_POST['start-date-d'];
-        print_r($day_diff);
+        $num_nights = ($year_diff * 365) + ($month_diff * 30) + $day_diff;
+        $_SESSION["num-nights"] = $num_nights;
 
         $agreed = isset($_POST['agreed']);
 
         if(!empty($start_date) && !empty($end_date) && $agreed){
-
-            $insert_agreement = "INSERT INTO rental_agreement (property_id, guest_id, host_id, document_link, signed, 
+            $agreement_result = pg_query("INSERT INTO rental_agreement (property_id, guest_id, host_id, document_link, signed, 
                                     signing_date, start_date, end_date) VALUES ($property_id, $guest_id, $host_id, '$doc_link',
-                                    TRUE,  '$today', '$start_date', '$end_date')";
-            $agreement_result = pg_query($dbh, $insert_agreement);
+                                    TRUE,  '$today', '$start_date', '$end_date')");
             if(!$agreement_result){
                 die("Error in SQL query:" .pg_last_error());
             }
@@ -113,12 +95,22 @@
                 die("Error in SQL query:" .pg_last_error());
             }
             pg_free_result($date_result);
+
+            //update payment to pending (to be completed on next page), assumed $0 cash for now
+            $payment_stmt = pg_query("INSERT INTO payment(host_id, guest_id, payment_type_id, amount, status)
+                                        VALUES($host_id, $guest_id, 1, 0, 'Pending') RETURNING payment_id");
+            $payment_result = pg_fetch_row($payment_stmt)[0];
+            if(!$payment_result){
+                die("Error in SQL query:" .pg_last_error());
+            } else {
+                $_SESSION["payment-id"] = $payment_result;
+            }
         }
         else {
             $output = 'All fields are mandatory';
         }
+        header("Location: Payment.php");
     }
-
 ?>
 <html>
     <head>
@@ -137,7 +129,7 @@
                 <a class="nav-link" href="#">Current Bookings</a>
                 <a class="nav-link" href="#">Past Bookings</a>
             </nav>
-            <form class="main-container" method="post" action="Payment.php">
+            <form class="main-container" method="post">
                 <h3>Booking</h3>
                 <?php
                     echo '<div class="property">

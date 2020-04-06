@@ -4,52 +4,15 @@
     $conn_string = "host=web0.eecs.uottawa.ca port = 15432 dbname=group_147 user=<user> password = <password>";
     $dbh = pg_connect($conn_string) or die ('Connection failed.');
 
-    $host_id = 1;
-	
-	$output = '';
-	$count=0;
-	//collect
-    if(!empty($_POST['citySearch'])){
-		$citySearchq = $_POST['citySearch'];
-		$citySearchq = preg_replace("#[^a-z]#i","",$citySearchq);
-		
-		$query = pg_query("SELECT * FROM property WHERE property.address_id=(SELECT address.address_id FROM address WHERE city LIKE '%$citySearchq%')") or die("could not search");
-		$count = pg_num_rows($query);
-		if($count == 0){
-			$output = 'There were no search results. Try searching something else.';
-		}else{
-			while($row = pg_fetch_array($query)){
-				$propertyName = $row['property_name'];
-				$guestCapacity = $row['guest_capacity'];
-				$numBath = $row['num_bathrooms'];
-				$numBed = $row['num_bedrooms'];
-				$nextAvail = $row['next_available_date'];
-				$rate = $row['rate'];
-				$image = $row['image'];
-				$description = $row['description'];
-				$propertyTypeID = $row['property_type_id'];
-				$addressID = $row['address_id'];
-				
-				//$output .= '<div> '.$propertyName.' '.$guestCapacity.' '.$numBath.' '.$numBed.' '.$nextAvail.' '.$rate.' '.$image.'</div>';
-			}
-		}
-		
-		if($count != 0){
-			$query2 = pg_query("SELECT property_type FROM property_type WHERE property_type_id = $propertyTypeID") or die("could not search.");
-			while($row = pg_fetch_array($query2)){
-				$propertyType = $row['property_type'];
-			}
-		}
+	$guest_id = $_SESSION['user_id'];
+	$today = date("Y-m-d");
 
-		if($count != 0){
-			$query3 = pg_query("SELECT * FROM address WHERE address_id = $addressID") or die("could not search.");
-			while($row = pg_fetch_array($query3)){
-				$streetName = $row['street_name'];
-				$city = $row['city'];
-			}
-		}
+	$curr_bookings = '';
+	
+	$curr_bookings_stmt = pg_query("SELECT property_id FROM rental_agreement WHERE guest_id = $guest_id AND end_date > NOW()");
+	if($curr_bookings_stmt){
+		$curr_bookings = pg_fetch_all($curr_bookings_stmt);
 	}
-     
 ?>
 <html>
     <head>
@@ -70,39 +33,12 @@
             </nav>
             <div class="main-container">
                 <h3>Upcoming Bookings:</h3>
-                <form action="SearchProperties.php" method="post">
-					<input type="text" name="citySearch" placeholder="Search by City"/>
-					<input type="submit" value=">>"/>
-				
-				</form>
-				<?php 
-				
-				if($count == 0){
-					print("$output");
-				}else{
-					echo '<div class="property">
-									<div class="image-desc">
-									
-										<img src = "'."../Images/".$image.'" class="property-image"/>
-										<div class="property-info">
-											<h2>'. $propertyName .' on '.$streetName.' in '.$city.'</h2>
-											<h3>$'. $rate .'/night</h3>
-											<h6>'.$description.'</h6>
-											<div> Next available date: '. $nextAvail .'</div>
-											<div>'.$propertyType.' with '. $numBed.' bedroom, '. $numBath .' bathroom</div>
-											<div></div>
-											<div> Maximum number of guests: '. $guestCapacity .'</div>
-										</div>
-						
-									</div>
-									<div>
-										
-										
-										<button type="button" class="btn btn-light" style="position:absolute; right:10%; top:50%;background-color:#86b3a0;">Book Now!</button>
-									</div>
-						</div>'
-				;
-				}
+				<?php
+					if(is_array($curr_bookings)){				
+						foreach($curr_bookings as $id => $booking){
+							echo '<div> Property: '. $booking['property_id'] .'</div>';
+						}
+					}
 				?>
             </div>
         </div>

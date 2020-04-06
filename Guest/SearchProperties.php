@@ -1,8 +1,9 @@
 <?php
-    $conn_string = "host=web0.eecs.uottawa.ca port = 15432 dbname=group_147 user=<user> password = <password>";
+	session_start();
+	$conn_string = "host=web0.eecs.uottawa.ca port = 15432 dbname=group_147 user=<user> password = <password>";
     $dbh = pg_connect($conn_string) or die ('Connection failed.');
 
-    $host_id = 1;
+	$guest_id = $_SESSION['user_id'];
 	
 	$output = '';
 	$count=0;
@@ -28,8 +29,6 @@
 				$description = $row['description'];
 				$propertyTypeID = $row['property_type_id'];
 				$addressID = $row['address_id'];
-				
-				
 			}
 		}
 		

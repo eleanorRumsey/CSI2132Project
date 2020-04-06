@@ -79,7 +79,7 @@ CREATE TABLE host
 address_id INT NOT NULL, 
 name_id INT NOT NULL, 
 email VARCHAR(100) NOT NULL,
-phone_number INT NOT NULL, 
+phone_number VARCHAR(15), 
 active VARCHAR(1),
 PRIMARY KEY (host_id),
 FOREIGN KEY (address_id) REFERENCES address (address_id) 

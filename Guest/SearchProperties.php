@@ -29,20 +29,7 @@
 				$propertyTypeID = $row['property_type_id'];
 				$addressID = $row['address_id'];
 				
-				$output .= '<div class="property">
-								<div class="image-desc">
-									<img src = "'."../Images/".$image.'" class="property-image"/>
-									<div class="property-info">
-										<h2>'. $propertyName .' on '.$streetName.' in '.$city.'</h2>
-										<h3>$'. $rate .'/night</h3>
-										<h6>'.$description.'</h6>
-										<div> Next available date: '. $nextAvail .'</div>
-										<div>'.$propertyType.' with '. $numBed.' bedroom, '. $numBath .' bathroom</div>
-										<div></div>
-										<div> Maximum number of guests: '. $guestCapacity .'</div>
-									</div>
-								</div>
-							</div>';
+				
 			}
 		}
 		
@@ -58,6 +45,20 @@
 			while($row = pg_fetch_array($query3)){
 				$streetName = $row['street_name'];
 				$city = $row['city'];
+				$output .= '<div class="property">
+								<div class="image-desc">
+									<img src = "'."../Images/".$image.'" class="property-image"/>
+									<div class="property-info">
+										<h2>'. $propertyName .' on '.$streetName.' in '.$city.'</h2>
+										<h3>$'. $rate .'/night</h3>
+										<h6>'.$description.'</h6>
+										<div> Next available date: '. $nextAvail .'</div>
+										<div>'.$propertyType.' with '. $numBed.' bedroom, '. $numBath .' bathroom</div>
+										<div></div>
+										<div> Maximum number of guests: '. $guestCapacity .'</div>
+									</div>
+								</div>
+							</div>';
 			}
 		}
 	}
@@ -79,7 +80,7 @@
     <body>
         <div class="header"> 
             <h1>Propertly.</h1>
-            <button type="button" class="btn btn-light" onclick="window.location.href = '../Login/Logout.php';">Log out</button>
+            <button type="button" class="btn btn-light">Log out</button>
         </div>
         <div class="page">
             <nav class="nav flex-column">
@@ -93,14 +94,17 @@
 					<input type="text" name="citySearch" placeholder="Search by City"/>
 					<input type="submit" value=">>"/>
 				</form>
-				<?php 
-					echo $output;
-				?>
+				
 				<form method="get" action="NewBooking.php">
 					<?php
+					if($count != 0){
 						echo '<input type="hidden" name="property-id" value="'. $propertyID.'">';
+						echo $output;
+						echo '<button type="submit" class="btn btn-light" name="book-property" style="position:absolute; right:10%; top:50%;background-color:#86b3a0;">Book Now!</button>';
+					}else{
+						echo $output;
+					}
 					?>
-					<button type="submit" class="btn btn-light" name="book-property" style="position:absolute; right:10%; top:50%;background-color:#86b3a0;">Book Now!</button>
 				</form>
             </div>
         </div>

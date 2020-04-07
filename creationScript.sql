@@ -69,8 +69,11 @@ country VARCHAR(56) NOT NULL,
 PRIMARY KEY (address_id),
 FOREIGN KEY (address_type_id) REFERENCES address_type (address_type_id) 
  ON DELETE RESTRICT ON UPDATE CASCADE,
-CHECK (province IN ('NS', 'NB', 'PE', 'NL', 'QC', 'ON', 'MB', 
-					'SK', 'AB', 'BC', 'YK', 'NT', 'NU')));
+CHECK (province IN ('NS', 'NB', 'PE', 'NL', 'QC', 'ON', 'MB','SK', 'AB', 'BC', 'YK', 'NT', 'NU', 
+					'AK','AL','AR','AZ','CA','CO','CT','DE','FL','GA','HI','IA','ID','IL','IN',
+					'KS','KY','LA','MA','MD','ME','MI','MN','MO','MS','MT','NC','ND','NE','NH',
+					'NJ','NM','NV','NY','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VA','VT',
+					'WA','WI','WV','WY')));
 					
 GRANT ALL ON TABLE address TO obore031;
 
@@ -210,7 +213,7 @@ GRANT ALL ON TABLE rental_agreement TO obore031;
 CREATE TABLE branch
 (branch_id SERIAL, 
 country VARCHAR(56) NOT NULL,
-branch_manager INT NOT NULL, 
+branch_manager INT, 
 address_id INT NOT NULL, 
 PRIMARY KEY (branch_id),
 FOREIGN KEY (address_id) REFERENCES address (address_id) 
@@ -262,3 +265,13 @@ FOREIGN KEY (amenity_id) REFERENCES amenity (amenity_id)
  ON DELETE CASCADE ON UPDATE CASCADE);
  
 GRANT ALL ON TABLE property_amenities TO obore031;
+
+CREATE VIEW GuestListView AS 
+SELECT g.email, g.phone_number, n.first_name, n.middle_name, n.last_name,
+	a.postal_code, a.street_number, a.unit, a.street_name, a.city, a.province, a.country
+FROM guest g
+	JOIN address a ON a.address_id = g.address_id
+	JOIN person_name n ON n.name_id = g.name_id
+	JOIN branch b ON b.country = a.country;
+
+	

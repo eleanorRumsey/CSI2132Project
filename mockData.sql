@@ -43,4 +43,29 @@ VALUES ('Charlie', 'Alpha', 'Omega');
 INSERT INTO guest(address_id, name_id, email, phone_number)
 VALUES(4, 2,'charlieo@gmail.com', '6133456549');
 
+-- Branches and employees --
+WITH a_id AS 
+(INSERT INTO address(postal_code, address_type_id, street_number, unit, street_name, city, province, country) 
+	VALUES ('W3W5W5', 3, 500, 34, 'Branch St.', 'Ottawa', 'ON', 'Canada') RETURNING address_id)
+INSERT INTO branch(country, address_id) 
+VALUES ('Canada', (SELECT address_id FROM a_id)); 
+
+
+WITH manager_name 
+	AS(INSERT INTO person_name(first_name, middle_name, last_name)
+ 		VALUES ('Ms. Canada', 'Branch', 'Manager') RETURNING name_id),
+ manager_id 
+ 	AS(INSERT INTO employee(branch_id, name_id, hire_date, yearly_salary, position_id)
+		VALUES ((SELECT branch_id FROM branch WHERE country = 'CANADA'), (SELECT name_id FROM manager_name), '2020-01-01', 65000, 1)
+		RETURNING employee_id)
+UPDATE branch SET branch_manager =(SELECT employee_id FROM manager_id) 
+	WHERE branch_id = (SELECT branch_id FROM branch WHERE country = 'Canada');
+
+WITH a_id AS 
+(INSERT INTO address(postal_code, address_type_id, street_number, unit, street_name, city, province, country) 
+	VALUES ('W3W5W5', 3, 32, 800, 'Branch Blvd.', 'New York', 'NY', 'United States') RETURNING address_id)
+INSERT INTO branch(country, address_id) 
+VALUES ('United States', (SELECT address_id FROM a_id)); 
+
+
 

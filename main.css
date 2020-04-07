@@ -20,6 +20,10 @@ h5 {
     margin: 0;
 }
 
+img {
+    object-fit: contain;
+}
+
 .page {
     display: flex;
     flex-direction: row;
@@ -69,6 +73,7 @@ h5 {
 .image-desc {
     display: flex;
     flex-direction: row;
+    align-items: flex-start;
 }
 
 .address-date {

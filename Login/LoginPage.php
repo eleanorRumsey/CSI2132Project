@@ -1,6 +1,9 @@
 <?php
 	session_start();
 	$conn_string = "host=web0.eecs.uottawa.ca port = 15432 dbname=group_147 user=<user> password = <password>";
+	
+	$_SESSION['conn_string'] = $conn_string;
+	
 	$dbh = pg_connect($conn_string) or die ('Connection failed.');
 	
 	$output = '';

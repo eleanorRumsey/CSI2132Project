@@ -1,6 +1,6 @@
 <?php
     session_start();
-    $conn_string = "host=web0.eecs.uottawa.ca port = 15432 dbname=group_147 user=<user> password = <password>";
+    $conn_string = $_SESSION['conn_string'];
     $dbh = pg_connect($conn_string) or die ('Connection failed.');
 
     $guest_id = $_SESSION['user_id'];
@@ -80,9 +80,19 @@
         $agreed = isset($_POST['agreed']);
 
         if(!empty($start_date) && !empty($end_date) && $agreed){
+            //update payment to pending (to be completed on next page), assumed $0 cash for now
+            $payment_stmt = pg_query("INSERT INTO payment(host_id, guest_id, payment_type_id, amount, status)
+                                        VALUES($host_id, $guest_id, 1, 0, 'Pending') RETURNING payment_id");
+            $payment_result = pg_fetch_row($payment_stmt)[0];
+            if(!$payment_result){
+                die("Error in SQL query:" .pg_last_error());
+            } else {
+                $_SESSION["payment-id"] = $payment_result;
+            }
+
             $agreement_result = pg_query("INSERT INTO rental_agreement (property_id, guest_id, host_id, document_link, signed, 
-                                    signing_date, start_date, end_date) VALUES ($property_id, $guest_id, $host_id, '$doc_link',
-                                    TRUE,  '$today', '$start_date', '$end_date')");
+                                    signing_date, start_date, end_date, payment_id) VALUES ($property_id, $guest_id, $host_id, '$doc_link',
+                                    TRUE,  '$today', '$start_date', '$end_date', $payment_result)");
             if(!$agreement_result){
                 die("Error in SQL query:" .pg_last_error());
             }
@@ -95,16 +105,6 @@
                 die("Error in SQL query:" .pg_last_error());
             }
             pg_free_result($date_result);
-
-            //update payment to pending (to be completed on next page), assumed $0 cash for now
-            $payment_stmt = pg_query("INSERT INTO payment(host_id, guest_id, payment_type_id, amount, status)
-                                        VALUES($host_id, $guest_id, 1, 0, 'Pending') RETURNING payment_id");
-            $payment_result = pg_fetch_row($payment_stmt)[0];
-            if(!$payment_result){
-                die("Error in SQL query:" .pg_last_error());
-            } else {
-                $_SESSION["payment-id"] = $payment_result;
-            }
         }
         else {
             $output = 'All fields are mandatory';
@@ -126,8 +126,7 @@
         <div class="page">
             <nav class="nav flex-column">
                 <a class="nav-link" href="SearchProperties.php">Search Properties</a>
-                <a class="nav-link" href="#">Current Bookings</a>
-                <a class="nav-link" href="#">Past Bookings</a>
+                <a class="nav-link" href="#">My Bookings</a>
             </nav>
             <form class="main-container" method="post">
                 <h3>Booking</h3>

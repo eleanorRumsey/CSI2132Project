@@ -194,12 +194,15 @@ signed BOOL NOT NULL,
 signing_date DATE NOT NULL,
 start_date DATE NOT NULL, 
 end_date DATE NOT NULL,
+payment_id INT NOT NULL,
 PRIMARY KEY (agreement_id),
 FOREIGN KEY (property_id) REFERENCES property (property_id) 
  ON DELETE SET NULL ON UPDATE CASCADE, 
 FOREIGN KEY (guest_id) REFERENCES guest (guest_id) 
  ON DELETE SET NULL ON UPDATE CASCADE,
 FOREIGN KEY (host_id) REFERENCES host (host_id) 
+ ON DELETE SET NULL ON UPDATE CASCADE,
+FOREIGN KEY (payment_id) REFERENCES payment(payment_id)
  ON DELETE SET NULL ON UPDATE CASCADE);
  
 GRANT ALL ON TABLE rental_agreement TO obore031;

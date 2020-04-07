@@ -1,7 +1,7 @@
 <?php
-//  session_start();
-	$conn_string = "host=web0.eecs.uottawa.ca port = 15432 dbname=group_147 user=<user> password = <password>";
- 	$dbh = pg_connect($conn_string) or die ('Connection failed.');
+    session_start();
+	$conn_string = $_SESSION['conn_string'];
+	$dbh = pg_connect($conn_string) or die ('Connection failed.');
  
 	if (isset($_POST['signup_btn'])) {
 		$email =  $_POST['username'];
@@ -58,18 +58,18 @@
 
 		//INSERT INTO GUEST OR HOST
 		if ($userType = 'guest') {
-			$insert_guest_sql = "INSERT INTO guest (address_id, name_id, email, phone_number) VALUES($address_id, $name_id,'$email', '$phone')";
-			$insert_guest_result = pg_query($dbh, $insert_guest_sql);
+			$insert_guest_result = pg_query("INSERT INTO guest (address_id, name_id, email, phone_number) VALUES($address_id, $name_id, '$email', '$phone')");
 			if(!$insert_guest_result){
 				die("Error in SQL query:" .pg_last_error());
 			}
-			pg_free_result($insert_guest_result);
 		}
 		elseif($userType = 'host'){
 			$insert_host_sql = "INSERT INTO host (email, phone_number, address_id, active) VALUES ('$email', '$phone', $address_id, 'Y')";
 			pg_query($dbh,$query3);
 			pg_query($dbh,$query4);
 		}
+
+		header('location: LoginPage.php');
 	}
  ?>
  <html>
@@ -87,7 +87,7 @@
             <div class="main-container" align-self="center">
                 <h3>Sign Up</h3>
 				<br/>
-                <form action="LoginPage.php" method="post">
+                <form action="" method="post">
 					<select id="userType" name="user">
 					  <option value="guest">Guest</option>
 					  <option value="host">Host</option>

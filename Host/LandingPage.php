@@ -1,6 +1,6 @@
 <?php 
     session_start();
-    $conn_string = "host=web0.eecs.uottawa.ca port = 15432 dbname=group_147 user=<user> password = <password>";
+    $conn_string = $_SESSION['conn_string'];
     $dbh = pg_connect($conn_string) or die ('Connection failed.');
 
     $hostid = 1;
@@ -30,8 +30,6 @@
 
     $amenities_sql = "SELECT amenity_type FROM amenity WHERE amenity_id IN (SELECT amenity_id FROM property_amenities WHERE property_id = $1)";
     $amenities_stmt = pg_prepare($dbh, "as", $amenities_sql);
-
-    session_destroy();    
 ?>
 <html>
     <head>

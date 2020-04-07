@@ -1,7 +1,7 @@
 <?php
 	session_start();
-	$conn_string = "host=web0.eecs.uottawa.ca port = 15432 dbname=group_147 user=<user> password = <password>";
-    $dbh = pg_connect($conn_string) or die ('Connection failed.');
+	$conn_string = $_SESSION['conn_string'];
+	$dbh = pg_connect($conn_string) or die ('Connection failed.');
 
 	$guest_id = $_SESSION['user_id'];
 	
@@ -61,14 +61,6 @@
 			}
 		}
 	}
-
-	// $_SESSION["property-id"] = $propertyID;
-
-	// if(isset($_POST['book-property'])){
-	// 	print_r("PROPERTY: " . $_SESSION["property-id"]);
-	// 	// header("Location: NewBooking.php");
-	// }
-     
 ?>
 <html>
     <head>
@@ -84,8 +76,7 @@
         <div class="page">
             <nav class="nav flex-column">
                 <a class="nav-link" href="#">Search Properties</a>
-                <a class="nav-link" href="CurrentBookings.php">Current Bookings</a>
-                <a class="nav-link" href="#">Past Bookings</a>
+                <a class="nav-link" href="CurrentBookings.php">My Bookings</a>
             </nav>
             <div class="main-container">
                 <h3>Enter Search Criteria</h3>

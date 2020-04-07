@@ -4,60 +4,162 @@
 	$dbh = pg_connect($conn_string) or die ('Connection failed.');
 
 	$guest_id = $_SESSION['user_id'];
-	
+
+	$beds_sql = "SELECT bed_type, num_of_beds FROM bed_setup WHERE property_id = $1";
+    $beds_stmt = pg_prepare($dbh, "bs", $beds_sql);
+
+	$rules_sql = "SELECT rule_type FROM rules WHERE rule_id IN (SELECT rule_id FROM property_rules WHERE property_id = $1)";
+    $rules_stmt = pg_prepare($dbh, "rs", $rules_sql);
+
+    $amenities_sql = "SELECT amenity_type FROM amenity WHERE amenity_id IN (SELECT amenity_id FROM property_amenities WHERE property_id = $1)";
+    $amenities_stmt = pg_prepare($dbh, "as", $amenities_sql);
+
 	$output = '';
 	$count=0;
 	//collect
-    if(!empty($_POST['citySearch'])){
+    if(isset($_POST['search-btn']) && !empty($_POST['citySearch'])){
 		$citySearchq = $_POST['citySearch'];
 		$citySearchq = preg_replace("#[^a-z]#i","",$citySearchq);
-		
-		$query = pg_query("SELECT * FROM property WHERE property.address_id=(SELECT address.address_id FROM address WHERE city LIKE '%$citySearchq%')") or die("could not search");
-		$count = pg_num_rows($query);
+
+		$filter_properties_stmt = pg_query("SELECT p.property_id, p.property_name, p.property_type_id, p.room_type_id, p.address_id, p.guest_capacity, p.num_bathrooms, 
+						p.num_bedrooms, p.next_available_date, p.description, p.rate, p.active, p.image, pt.property_type, rt.room_type, 
+						ad.postal_code, ad.street_number, ad.unit, ad.street_name, ad.city, ad.province, ad.country
+					FROM property p
+						JOIN room_type rt ON p.room_type_id = rt.room_type_id
+						JOIN property_type pt ON pt.property_type_id = p.property_type_id
+						JOIN address ad ON ad.address_id = p.address_id
+						JOIN address_type adt ON adt.address_type_id = ad.address_type_id
+					WHERE adt.address_type = 'Rental property' AND ad.city LIKE '%$citySearchq%'");
+	
+		$count = pg_num_rows($filter_properties_stmt);
 		if($count == 0){
 			$output = 'There were no search results. Try searching something else.';
 		}else{
-			while($row = pg_fetch_array($query)){
-				$propertyID = $row['property_id'];
-				$propertyName = $row['property_name'];
-				$guestCapacity = $row['guest_capacity'];
-				$numBath = $row['num_bathrooms'];
-				$numBed = $row['num_bedrooms'];
-				$nextAvail = $row['next_available_date'];
-				$rate = $row['rate'];
-				$image = $row['image'];
-				$description = $row['description'];
-				$propertyTypeID = $row['property_type_id'];
-				$addressID = $row['address_id'];
-			}
-		}
-		
-		if($count != 0){
-			$query2 = pg_query("SELECT property_type FROM property_type WHERE property_type_id = $propertyTypeID") or die("could not search.");
-			while($row = pg_fetch_array($query2)){
-				$propertyType = $row['property_type'];
-			}
-		}
+			$filter_properties = pg_fetch_all($filter_properties_stmt);
 
-		if($count != 0){
-			$query3 = pg_query("SELECT * FROM address WHERE address_id = $addressID") or die("could not search.");
-			while($row = pg_fetch_array($query3)){
-				$streetName = $row['street_name'];
-				$city = $row['city'];
-				$output .= '<div class="property">
+			foreach($filter_properties as $property){
+				$beds = pg_fetch_all(pg_execute($dbh, "bs", array($property['property_id'])));
+				$rules = pg_fetch_all(pg_execute($dbh, "rs", array($property['property_id'])));
+				$amenities = pg_fetch_all(pg_execute($dbh, "as", array($property['property_id'])));
+
+				$bedstring = "";
+				if(is_array($beds)){
+					foreach($beds as $b_setup){
+						$bedstring .= $b_setup['bed_type'] . " beds : " . $b_setup['num_of_beds'] . " ";
+					}
+				}
+
+				$rulestring = "";
+				if(is_array($rules)){
+					foreach($rules as $rule){
+						$rulestring .= $rule['rule_type'] . " ";
+					}
+				}
+
+				$amenitystring = "";
+				if(is_array($amenities)){
+					foreach($amenities as $amenity){
+						$amenitystring .= $amenity['amenity_type'] . " ";
+					}
+				}
+
+				$img_path = "../Images/" . $property['image'];
+
+				$output .= '<input type="hidden" name="property-id" value="'. $property['property_id'].'">
+							<div class="property">
 								<div class="image-desc">
-									<img src = "'."../Images/".$image.'" class="property-image"/>
+									<img src = "'.$img_path.'" class="property-image"/>
 									<div class="property-info">
-										<h2>'. $propertyName .' on '.$streetName.' in '.$city.'</h2>
-										<h3>$'. $rate .'/night</h3>
-										<h6>'.$description.'</h6>
-										<div> Next available date: '. $nextAvail .'</div>
-										<div>'.$propertyType.' with '. $numBed.' bedroom, '. $numBath .' bathroom</div>
-										<div></div>
-										<div> Maximum number of guests: '. $guestCapacity .'</div>
+										<h3>'. $property['property_name'] .'</h3>
+										<h5>'. $property['property_type'] .', '. $property['room_type'] .', $'. $property['rate'] .'/nt</h5>
+										<div>'. $property['num_bedrooms'].' bedroom, '. $property['num_bathrooms'] .' bathroom</div>
+										<div>'. $property['description'].'</div>
+										<div>'. $bedstring .'</div>
+										<div>'. $rulestring .'</div>
+										<div>'. $amenitystring .'</div>
 									</div>
 								</div>
-							</div>';
+								<div class="address-date">
+									<p> Available: '. $property["next_available_date"] .'</p>
+									<br/>
+									<h5>'. $property['unit'] .' '. $property['street_number'] .' '. $property['street_name'] .'</h5>
+									<h5>'. $property['city'] .', '. $property['province'] .', '. $property['country'] .'</h5>
+									<h5>'. $property['postal_code'] .'</h5>
+									<button type="submit" class="btn btn-primary" name="book-property">Book Now!</button>
+								</div>
+							</div>
+							<br/>';
+			}
+		}
+	} elseif(isset($_POST['search-btn']) && empty($_POST['citySearch'])) {
+		$all_properties_stmt = pg_query("SELECT p.property_id, p.property_name, p.property_type_id, p.room_type_id, p.address_id, p.guest_capacity, p.num_bathrooms, 
+						p.num_bedrooms, p.next_available_date, p.description, p.rate, p.active, p.image, pt.property_type, rt.room_type, 
+						ad.postal_code, ad.street_number, ad.unit, ad.street_name, ad.city, ad.province, ad.country
+					FROM property p
+						JOIN room_type rt ON p.room_type_id = rt.room_type_id
+						JOIN property_type pt ON pt.property_type_id = p.property_type_id
+						JOIN address ad ON ad.address_id = p.address_id
+						JOIN address_type adt ON adt.address_type_id = ad.address_type_id
+					WHERE adt.address_type = 'Rental property'");
+	
+		$all_properties = pg_fetch_all($all_properties_stmt);
+
+		$count = pg_num_rows($all_properties_stmt);
+		if($count == 0){
+			$output = 'There were no search results. Try searching something else.';
+		} else {
+			foreach($all_properties as $property){
+				$beds = pg_fetch_all(pg_execute($dbh, "bs", array($property['property_id'])));
+				$rules = pg_fetch_all(pg_execute($dbh, "rs", array($property['property_id'])));
+				$amenities = pg_fetch_all(pg_execute($dbh, "as", array($property['property_id'])));
+
+				$bedstring = "";
+				if(is_array($beds)){
+					foreach($beds as $b_setup){
+						$bedstring .= $b_setup['bed_type'] . " beds : " . $b_setup['num_of_beds'] . " ";
+					}
+				}
+
+				$rulestring = "";
+				if(is_array($rules)){
+					foreach($rules as $rule){
+						$rulestring .= $rule['rule_type'] . " ";
+					}
+				}
+
+				$amenitystring = "";
+				if(is_array($amenities)){
+					foreach($amenities as $amenity){
+						$amenitystring .= $amenity['amenity_type'] . " ";
+					}
+				}
+
+				$img_path = "../Images/" . $property['image'];
+
+				$output .= '<input type="hidden" name="property-id" value="'. $property['property_id'].'">
+							<div class="property">
+								<div class="image-desc">
+									<img src = "'.$img_path.'" class="property-image"/>
+									<div class="property-info">
+										<h3>'. $property['property_name'] .'</h3>
+										<h5>'. $property['property_type'] .', '. $property['room_type'] .', $'. $property['rate'] .'/nt</h5>
+										<div>'. $property['num_bedrooms'].' bedroom, '. $property['num_bathrooms'] .' bathroom</div>
+										<div>'. $property['description'].'</div>
+										<div>'. $bedstring .'</div>
+										<div>'. $rulestring .'</div>
+										<div>'. $amenitystring .'</div>
+									</div>
+								</div>
+								<div class="address-date">
+									<p> Available: '. $property["next_available_date"] .'</p>
+									<br/>
+									<h5>'. $property['unit'] .' '. $property['street_number'] .' '. $property['street_name'] .'</h5>
+									<h5>'. $property['city'] .', '. $property['province'] .', '. $property['country'] .'</h5>
+									<h5>'. $property['postal_code'] .'</h5>
+									<button type="submit" class="btn btn-primary" name="book-property">Book Now!</button>
+								</div>
+							</div>
+							<br/>';
 			}
 		}
 	}
@@ -71,7 +173,7 @@
     <body>
         <div class="header"> 
             <h1>Propertly.</h1>
-            <button type="button" class="btn btn-light">Log out</button>
+            <button type="button" class="btn btn-light" onclick="window.location.href = '../Login/Logout.php';">Log out</button>
         </div>
         <div class="page">
             <nav class="nav flex-column">
@@ -82,18 +184,11 @@
                 <h3>Enter Search Criteria</h3>
                 <form action="SearchProperties.php" method="post">
 					<input type="text" name="citySearch" placeholder="Search by City"/>
-					<input type="submit" value=">>"/>
+					<input type="submit" name="search-btn" value=">>"/>
 				</form>
-				
 				<form method="get" action="NewBooking.php">
 					<?php
-					if($count != 0){
-						echo '<input type="hidden" name="property-id" value="'. $propertyID.'">';
 						echo $output;
-						echo '<button type="submit" class="btn btn-light" name="book-property" style="position:absolute; right:10%; top:50%;background-color:#86b3a0;">Book Now!</button>';
-					}else{
-						echo $output;
-					}
 					?>
 				</form>
             </div>

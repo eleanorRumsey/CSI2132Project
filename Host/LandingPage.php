@@ -3,12 +3,13 @@
     $conn_string = $_SESSION['conn_string'];
     $dbh = pg_connect($conn_string) or die ('Connection failed.');
 
-    $hostid = 1;
+    $host_id = $_SESSION['user_id'];
     
-    $properties_sql = "SELECT property_id, property_name, property_type_id, room_type_id, address_id, guest_capacity, num_bathrooms, num_bedrooms, 
-                    next_available_date, description, rate, active, image FROM property WHERE host_id = $1";
+    $properties_sql = "SELECT p.property_id, p.property_name, p.property_type_id, p.room_type_id, p.address_id, p,guest_capacity, p.num_bathrooms, p.num_bedrooms, 
+                    p.next_available_date, p.description, p.rate, p.active, p.image 
+                    FROM property p WHERE host_id = $1";
     $property_stmt = pg_prepare($dbh, "ps", $properties_sql);
-    $property_result = pg_execute($dbh, "ps", array(1));
+    $property_result = pg_execute($dbh, "ps", array($host_id));
     if(!$property_result){
         die("Error in SQL query:" .pg_last_error());
     }

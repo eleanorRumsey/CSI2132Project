@@ -135,8 +135,6 @@
         }
         header('Location: LandingPage.php');
     }
-    
-    session_destroy();
 ?>
 <html>
     <head>

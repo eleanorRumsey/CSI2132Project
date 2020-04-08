@@ -151,7 +151,7 @@
             <nav class="nav flex-column">
                 <a class="nav-link" href="LandingPage.php">My properties</a>
                 <a class="nav-link" href="#">New property</a>
-                <a class="nav-link" href="#">History</a>
+                <a class="nav-link" href="History.php">History</a>
             </nav>
             <div class="main-container">
                 <form id="new-property-form" name="property-form" method="post" action="">

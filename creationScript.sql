@@ -274,4 +274,6 @@ FROM guest g
 	JOIN person_name n ON n.name_id = g.name_id
 	JOIN branch b ON b.country = a.country;
 
-	
+CREATE FUNCTION firstNameFirst (firstName VARCHAR(50), lastName VARCHAR(50)) RETURNS VARCHAR(61) AS $$
+SELECT concat(firstName, ' ', lastName);
+$$ LANGUAGE SQL;

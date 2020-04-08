@@ -68,7 +68,7 @@ JOIN address_type adt ON adt.address_type_id = ad.address_type_id
 JOIN (SELECT property_id, avg(overall_rating) as avg_ovr, avg(communication_rating) as avg_comm, 
 	avg(clean_rating) as avg_clean, avg(value_rating) as avg_val FROM review GROUP BY property_id) 
 	as rev_avg on rev_avg.property_id = p.property_id
-WHERE adt.address_type = 'Rental property' AND p.next_available_date < <date>;
+WHERE adt.address_type = 'Rental property' AND p.next_available_date <= <date>;
 
 --VIEW CURRENT AND UPCOMING BOOKINGS AS A GUEST--
 SELECT p.property_id, p.property_name, ra.guest_id, ra.start_date, ra.end_date, pt.property_type, rt.room_type, p.rate, 
@@ -140,6 +140,18 @@ FROM property p
 		as rev_avg on rev_avg.property_id = p.property_id
 WHERE p.host_id = <host_id>;
 
+--VIEW ALL GUEST ACTIVITY ON HOSTED PROPERTIES AS HOST--
+SELECT p.property_name, p.rate, ra.signing_date, ra.start_date, ra.end_date, r.overall_rating, 
+r.communication_rating, r.clean_rating, r.value_rating, pm.amount, pmt.payment_type, pm.status, glv.first_name as first_name, 
+glv.last_name AS last_name, glv.postal_code AS guest_postal_code
+FROM rental_agreement ra 
+	JOIN property p ON ra.property_id = p.property_id
+	JOIN payment pm ON pm.payment_id = ra.payment_id
+	JOIN payment_type pmt ON pmt.payment_type_id = pm.payment_type_id
+	JOIN guestlistview glv ON glv.guest_id = ra.guest_id
+	JOIN review r ON (r.property_id = p.property_id AND r.guest_id = ra.guest_id)
+WHERE ra.host_id = <host_id>
+ORDER BY pmt.payment_type ASC, ra.signing_date DESC
 
 
 	

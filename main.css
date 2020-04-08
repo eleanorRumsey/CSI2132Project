@@ -24,6 +24,10 @@ img {
     object-fit: contain;
 }
 
+th, td {
+    text-align: center;
+}
+
 .page {
     display: flex;
     flex-direction: row;

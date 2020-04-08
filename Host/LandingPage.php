@@ -17,7 +17,7 @@
                             JOIN (SELECT property_id, avg(overall_rating) as avg_ovr, avg(communication_rating) as avg_comm, 
                                 avg(clean_rating) as avg_clean, avg(value_rating) as avg_val FROM review GROUP BY property_id) 
                                 as rev_avg on rev_avg.property_id = p.property_id
-                        WHERE p.host_id = $host_id;");
+                        WHERE p.host_id = $host_id");
     if($properties_stmt){
         $properties = pg_fetch_all($properties_stmt);
     }
@@ -46,7 +46,7 @@
             <nav class="nav flex-column">
                 <a class="nav-link" href="#">My properties</a>
                 <a class="nav-link" href="NewProperty.php">New property</a>
-                <a class="nav-link" href="#">History</a>
+                <a class="nav-link" href="History.php">History</a>
             </nav>
             <div class="main-container">
                 <?php

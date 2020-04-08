@@ -4,7 +4,7 @@
     $dbh = pg_connect($conn_string) or die ('Connection failed.');
 
     $guest_id = $_SESSION['user_id'];
-    $property_id = $_GET["property-id"];
+    $property_id = $_GET['property-id'];
     
     $property_result = pg_query("SELECT property_id, property_name, property_type_id, room_type_id, address_id, guest_capacity, num_bathrooms, num_bedrooms, 
                                     next_available_date, description, rate, active, image FROM property where property_id = $property_id");

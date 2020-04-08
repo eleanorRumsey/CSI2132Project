@@ -6,12 +6,35 @@
     $property_id = $_SESSION['property_id'];
     $nights = $_SESSION["num-nights"];
     
-    $property_stmt = pg_query("SELECT property_name, host_id, rate FROM property WHERE property_id = $property_id");
+    $property_stmt = pg_query("SELECT p.property_name, p.rate, pt.property_type, n.first_name, n.last_name, a.unit, a.street_number, 
+                                a.street_name, a.city, a.postal_code, a.country, a.province
+                                FROM property p
+                                    JOIN host h ON h.host_id = p.host_id 
+                                    JOIN person_name n ON n.name_id = h.name_id
+                                    JOIN address a ON a.address_id = p.address_id
+                                    JOIN property_type pt ON pt.property_type_id = p.property_type_id 
+                                WHERE property_id = $property_id");
     $property = pg_fetch_row($property_stmt);
     if(!$property){
         die("Error in SQL query:" .pg_last_error());
     } 
-    $total = $nights * $property[2];
+
+    $p_name = $property[0];
+    $rate = $property[1];
+    $p_type = $property[2];
+    $first_name = $property[3];
+    $last_name = $property[4];
+    $unit = $property[5];
+    $street_num = $property[6];
+    $street_name = $property[7];
+    $city = $property[8];
+    $postal_code = $property[9];
+    $country = $property[10];
+    $province = $property[11];
+
+    $full_name = pg_fetch_row(pg_query("SELECT * FROM firstNameFirst('$first_name', '$last_name')"))[0];
+
+    $total = $nights * $rate;
 
     $payment_type_stmt = pg_query("SELECT payment_type FROM payment_type");
     $payment_types = pg_fetch_all($payment_type_stmt);
@@ -29,7 +52,22 @@
         }   
     }
 
-
+    $output = '<div class="property">
+    <div class="image-desc">
+            <div class="property-info">
+                <h3>'. $p_name .'</h3>
+                <h5>'. $p_type .'</h5>
+                <h5> Hosted by: '. $full_name .' </h5>
+                <br/>
+                <h5>'. $unit .' '. $street_num .' '. $street_name .'</h5>
+				<h5>'. $city .', '. $province .', '. $country .'</h5>
+                <h5>'. $postal_code .'</h5>
+                <br/>
+                <div> Rate: $'. $rate . '/nt </div>
+            </div>
+        </div>
+    </div>
+    <p>Total for '. $nights .' nights: $'. $total .'</p>';
 ?>
 <html>
     <head>
@@ -47,20 +85,12 @@
                 <a class="nav-link" href="SearchProperties.php">Search Properties</a>
                 <a class="nav-link" href="#">My Bookings</a>
             </nav>
-            <form class="main-container" method="post" action="CurrentBookings.php">
+            <form class="main-container" method="post" action="">
                 <h3>Payment</h3>
                 <br/>
                 <?php
-                    echo '<div class="property">
-                    <div class="image-desc">
-                        <div class="property-info">
-                            <h3>'. $property[0] .'</h3>
-                            <div> Rate: $'. $property[2] . '/nt </div>
-                        </div>
-                    </div>
-                  </div>
-                  <p>Total: $'. $total .'</p>';
-                  ?>
+                    echo $output;   
+                ?>
                 <div> 
                     <p>Select your method of payment: </p>
                     <select class="form-control" name="payment-type">

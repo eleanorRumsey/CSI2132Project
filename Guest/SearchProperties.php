@@ -16,33 +16,9 @@
 
 	$output = '';
 	$count=0;
-	//collect
-    if(isset($_POST['search-btn']) && !empty($_POST['citySearch'])){
-		$citySearchq = $_POST['citySearch'];
-		$citySearchq = preg_replace("#[^a-z]#i","",$citySearchq);
 
-		$filter_properties_stmt = pg_query("SELECT p.property_id, p.property_name, p.address_id, p.guest_capacity, p.num_bathrooms, p.num_bedrooms, 
-											p.next_available_date, p.description, p.rate, p.active, p.image, pt.property_type, rt.room_type, 
-											rev_avg.avg_ovr, rev_avg.avg_comm, rev_avg.avg_clean, rev_avg.avg_val,
-											ad.postal_code, ad.street_number, ad.unit, ad.street_name, ad.city, ad.province, ad.country
-											FROM property p
-												JOIN room_type rt ON p.room_type_id = rt.room_type_id
-												JOIN property_type pt ON pt.property_type_id = p.property_type_id
-												JOIN address ad ON ad.address_id = p.address_id
-												JOIN address_type adt ON adt.address_type_id = ad.address_type_id
-												JOIN (SELECT property_id, avg(overall_rating) as avg_ovr, avg(communication_rating) as avg_comm, 
-													avg(clean_rating) as avg_clean, avg(value_rating) as avg_val FROM review GROUP BY property_id) 
-													as rev_avg on rev_avg.property_id = p.property_id
-											WHERE adt.address_type = 'Rental property' AND ad.city LIKE '%$citySearchq%'");
-	
-		$count = pg_num_rows($filter_properties_stmt);
-		if($count == 0){
-			$output = 'There were no search results. Try searching something else.';
-		}else{
-			$filter_properties = pg_fetch_all($filter_properties_stmt);
-
-			foreach($filter_properties as $property){
-				$beds = pg_fetch_all(pg_execute($dbh, "bs", array($property['property_id'])));
+	function getProperty($dbh, $property){
+		$beds = pg_fetch_all(pg_execute($dbh, "bs", array($property['property_id'])));
 				$rules = pg_fetch_all(pg_execute($dbh, "rs", array($property['property_id'])));
 				$amenities = pg_fetch_all(pg_execute($dbh, "as", array($property['property_id'])));
 
@@ -69,39 +45,96 @@
 
 				$img_path = "../Images/" . $property['image'];
 
-				$output .= '<input type="hidden" name="property-id" value="'. $property['property_id'].'">
-							<div class="property">
-								<div class="image-desc">
-									<img src = "'.$img_path.'" class="property-image"/>
-									<div class="property-info">
-										<h3>'. $property['property_name'] .'</h3>
-										<h5>'. $property['property_type'] .', '. $property['room_type'] .', $'. $property['rate'] .'/nt</h5>
-										<div>'. $property['num_bedrooms'].' bedroom, '. $property['num_bathrooms'] .' bathroom</div>
-										<div>'. $property['description'].'</div>
-										<div>'. $bedstring .'</div>
-										<div>'. $rulestring .'</div>
-										<div>'. $amenitystring .'</div>
-									</div>
-								</div>
-								<div class="address-date">
-									<p> Available: '. $property["next_available_date"] .'</p>
-									<br/>
-									<h5>'. $property['unit'] .' '. $property['street_number'] .' '. $property['street_name'] .'</h5>
-									<h5>'. $property['city'] .', '. $property['province'] .', '. $property['country'] .'</h5>
-									<h5>'. $property['postal_code'] .'</h5>
-									<br/>
-									<p>REVIEWS</p>
-									<div>Overall: '. round($property['avg_ovr'], 2).'</div>
-									<div>Cleanliness: '. round($property['avg_clean'], 2) .'</div>
-									<div>Communication: '. round($property['avg_comm'], 2).'</div>
-									<div>Value: '. round($property['avg_val'], 2).'</div>
-									<button type="submit" class="btn btn-primary" name="book-property">Book Now!</button>
-								</div>
-							</div>
-							<br/>';
+		return '<input type="hidden" name="property-id" value="'. $property['property_id'].'">
+		<div class="property">
+			<div class="image-desc">
+				<img src = "'.$img_path.'" class="property-image"/>
+				<div class="property-info">
+					<h3>'. $property['property_name'] .'</h3>
+					<h5>'. $property['property_type'] .', '. $property['room_type'] .', $'. $property['rate'] .'/nt</h5>
+					<div>'. $property['num_bedrooms'].' bedroom, '. $property['num_bathrooms'] .' bathroom</div>
+					<div>'. $property['description'].'</div>
+					<div>'. $bedstring .'</div>
+					<div>'. $rulestring .'</div>
+					<div>'. $amenitystring .'</div>
+				</div>
+			</div>
+			<div class="address-date">
+				<p> Available: '. $property["next_available_date"] .'</p>
+				<br/>
+				<h5>'. $property['unit'] .' '. $property['street_number'] .' '. $property['street_name'] .'</h5>
+				<h5>'. $property['city'] .', '. $property['province'] .', '. $property['country'] .'</h5>
+				<h5>'. $property['postal_code'] .'</h5>
+				<br/>
+				<p>REVIEWS</p>
+				<div>Overall: '. round($property['avg_ovr'], 2).'</div>
+				<div>Cleanliness: '. round($property['avg_clean'], 2) .'</div>
+				<div>Communication: '. round($property['avg_comm'], 2).'</div>
+				<div>Value: '. round($property['avg_val'], 2).'</div>
+				<button type="submit" class="btn btn-primary" name="book-property">Book Now!</button>
+			</div>
+		</div>
+		<br/>';
+	}
+
+	//Search by city
+    if(isset($_POST['city-search-btn']) && !empty($_POST['citySearch'])){
+		$citySearchq = $_POST['citySearch'];
+		$citySearchq = preg_replace("#[^a-z]#i","",$citySearchq);
+
+		$filter_properties_city_stmt = pg_query("SELECT p.property_id, p.property_name, p.address_id, p.guest_capacity, p.num_bathrooms, p.num_bedrooms, 
+											p.next_available_date, p.description, p.rate, p.active, p.image, pt.property_type, rt.room_type, 
+											rev_avg.avg_ovr, rev_avg.avg_comm, rev_avg.avg_clean, rev_avg.avg_val,
+											ad.postal_code, ad.street_number, ad.unit, ad.street_name, ad.city, ad.province, ad.country
+											FROM property p
+												JOIN room_type rt ON p.room_type_id = rt.room_type_id
+												JOIN property_type pt ON pt.property_type_id = p.property_type_id
+												JOIN address ad ON ad.address_id = p.address_id
+												JOIN address_type adt ON adt.address_type_id = ad.address_type_id
+												JOIN (SELECT property_id, avg(overall_rating) as avg_ovr, avg(communication_rating) as avg_comm, 
+													avg(clean_rating) as avg_clean, avg(value_rating) as avg_val FROM review GROUP BY property_id) 
+													as rev_avg on rev_avg.property_id = p.property_id
+											WHERE adt.address_type = 'Rental property' AND ad.city LIKE '%$citySearchq%'");
+	
+		$count = pg_num_rows($filter_properties_city_stmt);
+		if($count == 0){
+			$output = 'There were no search results. Try searching something else.';
+		}else{
+			$filter_properties_city = pg_fetch_all($filter_properties_city_stmt);
+
+			foreach($filter_properties_city as $property){
+				$output .= getProperty($dbh, $property);
 			}
 		}
-	} elseif(isset($_POST['search-btn']) && empty($_POST['citySearch'])) {
+	} elseif(isset($_POST['date-search-btn']) && !empty($_POST['dateSearch'])){
+		$dateSearchq = $_POST['dateSearch'];
+
+		$filter_properties_date_stmt = pg_query("SELECT p.property_id, p.property_name, p.address_id, p.guest_capacity, p.num_bathrooms, p.num_bedrooms, 
+		p.next_available_date, p.description, p.rate, p.active, p.image, pt.property_type, rt.room_type, 
+		rev_avg.avg_ovr, rev_avg.avg_comm, rev_avg.avg_clean, rev_avg.avg_val,
+		ad.postal_code, ad.street_number, ad.unit, ad.street_name, ad.city, ad.province, ad.country
+		FROM property p
+		JOIN room_type rt ON p.room_type_id = rt.room_type_id
+		JOIN property_type pt ON pt.property_type_id = p.property_type_id
+		JOIN address ad ON ad.address_id = p.address_id
+		JOIN address_type adt ON adt.address_type_id = ad.address_type_id
+		JOIN (SELECT property_id, avg(overall_rating) as avg_ovr, avg(communication_rating) as avg_comm, 
+			avg(clean_rating) as avg_clean, avg(value_rating) as avg_val FROM review GROUP BY property_id) 
+			as rev_avg on rev_avg.property_id = p.property_id
+		WHERE adt.address_type = 'Rental property' AND p.next_available_date <= '$dateSearchq'");
+
+		$count = pg_num_rows($filter_properties_date_stmt);
+		if($count == 0){
+			$output = 'There were no search results. Try searching something else.';
+		}else{
+			$filter_properties_date = pg_fetch_all($filter_properties_date_stmt);
+
+			foreach($filter_properties_date as $property){
+				$output .= getProperty($dbh, $property);
+			}
+		}
+
+	} elseif((isset($_POST['city-search-btn']) && empty($_POST['citySearch'])) || (isset($_POST['date-search-btn']) && empty($_POST['dateSearch']))) {
 		$all_properties_stmt = pg_query("SELECT p.property_id, p.property_name, p.address_id, p.guest_capacity, p.num_bathrooms, p.num_bedrooms, 
 										p.next_available_date, p.description, p.rate, p.active, p.image, pt.property_type, rt.room_type, 
 										rev_avg.avg_ovr, rev_avg.avg_comm, rev_avg.avg_clean, rev_avg.avg_val,
@@ -123,63 +156,7 @@
 			$output = 'There were no search results. Try searching something else.';
 		} else {
 			foreach($all_properties as $property){
-				$beds = pg_fetch_all(pg_execute($dbh, "bs", array($property['property_id'])));
-				$rules = pg_fetch_all(pg_execute($dbh, "rs", array($property['property_id'])));
-				$amenities = pg_fetch_all(pg_execute($dbh, "as", array($property['property_id'])));
-
-				$bedstring = "";
-				if(is_array($beds)){
-					foreach($beds as $b_setup){
-						$bedstring .= $b_setup['bed_type'] . " beds : " . $b_setup['num_of_beds'] . " ";
-					}
-				}
-
-				$rulestring = "";
-				if(is_array($rules)){
-					foreach($rules as $rule){
-						$rulestring .= $rule['rule_type'] . " ";
-					}
-				}
-
-				$amenitystring = "";
-				if(is_array($amenities)){
-					foreach($amenities as $amenity){
-						$amenitystring .= $amenity['amenity_type'] . " ";
-					}
-				}
-
-				$img_path = "../Images/" . $property['image'];
-
-				$output .= '<input type="hidden" name="property-id" value="'. $property['property_id'].'">
-							<div class="property">
-								<div class="image-desc">
-									<img src = "'.$img_path.'" class="property-image"/>
-									<div class="property-info">
-										<h3>'. $property['property_name'] .'</h3>
-										<h5>'. $property['property_type'] .', '. $property['room_type'] .', $'. $property['rate'] .'/nt</h5>
-										<div>'. $property['num_bedrooms'].' bedroom, '. $property['num_bathrooms'] .' bathroom</div>
-										<div>'. $property['description'].'</div>
-										<div>'. $bedstring .'</div>
-										<div>'. $rulestring .'</div>
-										<div>'. $amenitystring .'</div>
-									</div>
-								</div>
-								<div class="address-date">
-									<p> Available: '. $property["next_available_date"] .'</p>
-									<br/>
-									<h5>'. $property['unit'] .' '. $property['street_number'] .' '. $property['street_name'] .'</h5>
-									<h5>'. $property['city'] .', '. $property['province'] .', '. $property['country'] .'</h5>
-									<h5>'. $property['postal_code'] .'</h5>
-									<br/>
-									<p>REVIEWS</p>
-									<div>Overall: '. round($property['avg_ovr'], 2).'</div>
-									<div>Cleanliness: '. round($property['avg_clean'], 2) .'</div>
-									<div>Communication: '. round($property['avg_comm'], 2).'</div>
-									<div>Value: '. round($property['avg_val'], 2).'</div>
-									<button type="submit" class="btn btn-primary" name="book-property">Book Now!</button>
-								</div>
-							</div>
-							<br/>';
+				$output .= getProperty($dbh, $property);
 			}
 		}
 	}
@@ -202,9 +179,13 @@
             </nav>
             <div class="main-container">
                 <h3>Enter Search Criteria</h3>
-                <form action="SearchProperties.php" method="post">
-					<input type="text" name="citySearch" placeholder="Search by City"/>
-					<input type="submit" name="search-btn" value=">>"/>
+                <form action="" method="post">
+					<input type="text" name="citySearch" placeholder="Search by city"/>
+					<input type="submit" name="city-search-btn" value=">>"/>
+				</form>
+				<form action="" method="post">
+					<input type="text" name="dateSearch" placeholder="Search by date (yyyy-mm-dd)"/>
+					<input type="submit" name="date-search-btn" value=">>"/>
 				</form>
 				<form method="get" action="NewBooking.php">
 					<?php

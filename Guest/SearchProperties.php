@@ -21,7 +21,7 @@
 		$citySearchq = $_POST['citySearch'];
 		$citySearchq = preg_replace("#[^a-z]#i","",$citySearchq);
 
-		$filter_properties_stmt = pg_query("SELECT p.property_id, p.property_name, p.property_type_id, p.room_type_id, p.address_id, p.guest_capacity, p.num_bathrooms, 
+		$filter_properties_stmt = pg_query("SELECT p.property_id, p.property_name, p.address_id, p.guest_capacity, p.num_bathrooms, 
 						p.num_bedrooms, p.next_available_date, p.description, p.rate, p.active, p.image, pt.property_type, rt.room_type, 
 						ad.postal_code, ad.street_number, ad.unit, ad.street_name, ad.city, ad.province, ad.country
 					FROM property p

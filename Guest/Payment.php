@@ -21,7 +21,7 @@
     if(isset($_POST['pay-btn'])){
         $payment_type = $_POST['payment-type'];
 
-        $update_payment = "UPDATE payment SET payment_type_id = $payment_type, amount = $total
+        $update_payment = "UPDATE payment SET payment_type_id = $payment_type, amount = $total, status = 'Approved'
                                         WHERE payment_id = $payment_id";
         $payment_result = pg_query($update_payment);
         if(!$payment_result){

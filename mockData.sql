@@ -50,13 +50,10 @@ WITH a_id AS
 INSERT INTO branch(country, address_id) 
 VALUES ('Canada', (SELECT address_id FROM a_id)); 
 
-
-WITH manager_name 
-	AS(INSERT INTO person_name(first_name, middle_name, last_name)
+WITH manager_name AS(INSERT INTO person_name(first_name, middle_name, last_name)
  		VALUES ('Ms. Canada', 'Branch', 'Manager') RETURNING name_id),
- manager_id 
- 	AS(INSERT INTO employee(branch_id, name_id, hire_date, yearly_salary, position_id)
-		VALUES ((SELECT branch_id FROM branch WHERE country = 'CANADA'), (SELECT name_id FROM manager_name), '2020-01-01', 65000, 1)
+ manager_id AS(INSERT INTO employee(branch_id, name_id, hire_date, yearly_salary, position_id)
+		VALUES ((SELECT branch_id FROM branch WHERE country = 'Canada'), (SELECT name_id FROM manager_name), '2020-01-01', 65000, 1)
 		RETURNING employee_id)
 UPDATE branch SET branch_manager =(SELECT employee_id FROM manager_id) 
 	WHERE branch_id = (SELECT branch_id FROM branch WHERE country = 'Canada');
@@ -67,5 +64,12 @@ WITH a_id AS
 INSERT INTO branch(country, address_id) 
 VALUES ('United States', (SELECT address_id FROM a_id)); 
 
+WITH manager_name AS(INSERT INTO person_name(first_name, middle_name, last_name)
+ 		VALUES ('Mr. US', 'Branch', 'Manager') RETURNING name_id),
+ manager_id AS(INSERT INTO employee(branch_id, name_id, hire_date, yearly_salary, position_id)
+		VALUES ((SELECT branch_id FROM branch WHERE country = 'United States'), (SELECT name_id FROM manager_name), '2018-06-02', 63000, 1)
+		RETURNING employee_id)
+UPDATE branch SET branch_manager =(SELECT employee_id FROM manager_id) 
+	WHERE branch_id = (SELECT branch_id FROM branch WHERE country = 'United States');
 
 

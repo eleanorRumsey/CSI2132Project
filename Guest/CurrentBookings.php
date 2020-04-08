@@ -10,37 +10,36 @@
 	$curr_bookings = 'There are no current bookings.';
 	$past_bookings = 'There are no past bookings.';
 	
-	$curr_bookings_stmt = pg_query("SELECT p.property_id, p.address_id, p.property_name, ra.guest_id, ra.start_date, ra.end_date, 
-									pt.property_type, rt.room_type, p.rate, p.num_bedrooms, p.num_bathrooms, p.description, p.image,
-									pm.amount, pmt.payment_type, pm.status
+	$curr_bookings_stmt = pg_query("SELECT p.property_id, p.property_name, ra.guest_id, ra.start_date, ra.end_date, pt.property_type, rt.room_type, p.rate, 
+									p.num_bedrooms, p.num_bathrooms, p.description, p.image, pm.amount, pmt.payment_type, pm.status, ad.postal_code, 
+									ad.street_number, ad.unit, ad.street_name, ad.city, ad.province, ad.country
 									FROM rental_agreement ra 
-									JOIN property p ON ra.property_id = p.property_id
-									JOIN property_type pt ON pt.property_type_id = p.property_type_id
-									JOIN room_type rt ON rt.room_type_id = p.room_type_id
-									JOIN payment pm on pm.payment_id = ra.payment_id
-									JOIN payment_type pmt on pmt.payment_type_id = pm.payment_type_id
-									WHERE ra.guest_id = $guest_id AND end_date > NOW()");
+										JOIN property p ON ra.property_id = p.property_id
+										JOIN property_type pt ON pt.property_type_id = p.property_type_id
+										JOIN room_type rt ON rt.room_type_id = p.room_type_id
+										JOIN payment pm on pm.payment_id = ra.payment_id
+										JOIN payment_type pmt on pmt.payment_type_id = pm.payment_type_id
+										JOIN address ad ON ad.address_id = p.address_id
+									WHERE ra.guest_id = $guest_id AND end_date >= NOW()");
 
 	if($curr_bookings_stmt){
 		$curr_bookings = pg_fetch_all($curr_bookings_stmt);
 	}
 
-	$past_bookings_stmt = pg_query("SELECT p.property_id, p.address_id, p.property_name, ra.guest_id, ra.start_date, ra.end_date, 
-									pt.property_type, rt.room_type, p.rate, p.num_bedrooms, p.num_bathrooms, p.description, p.image,
-									pm.amount, pmt.payment_type, pm.status
+	$past_bookings_stmt = pg_query("SELECT p.property_id, p.property_name, ra.guest_id, ra.start_date, ra.end_date, pt.property_type, rt.room_type, p.rate, 
+									p.num_bedrooms, p.num_bathrooms, p.description, p.image, pm.amount, pmt.payment_type, pm.status, ad.postal_code, 
+									ad.street_number, ad.unit, ad.street_name, ad.city, ad.province, ad.country
 									FROM rental_agreement ra 
-									JOIN property p ON ra.property_id = p.property_id
-									JOIN property_type pt ON pt.property_type_id = p.property_type_id
-									JOIN room_type rt ON rt.room_type_id = p.room_type_id
-									JOIN payment pm on pm.payment_id = ra.payment_id
-									JOIN payment_type pmt on pmt.payment_type_id = pm.payment_type_id
+										JOIN property p ON ra.property_id = p.property_id
+										JOIN property_type pt ON pt.property_type_id = p.property_type_id
+										JOIN room_type rt ON rt.room_type_id = p.room_type_id
+										JOIN payment pm on pm.payment_id = ra.payment_id
+										JOIN payment_type pmt on pmt.payment_type_id = pm.payment_type_id
+										JOIN address ad ON ad.address_id = p.address_id
 									WHERE ra.guest_id = $guest_id AND end_date < NOW()");
 	if($past_bookings_stmt){
 		$past_bookings = pg_fetch_all($past_bookings_stmt);
 	}
-
-	$p_address_sql = "SELECT unit, street_number, street_name, city, province, country, postal_code FROM address WHERE address_id =$1";
-    $p_address_stmt = pg_prepare($dbh, "pas", $p_address_sql);
 
     $beds_sql = "SELECT bed_type, num_of_beds FROM bed_setup WHERE property_id = $1";
     $beds_stmt = pg_prepare($dbh, "bs", $beds_sql);
@@ -72,7 +71,6 @@
 				<?php
 					if(is_array($curr_bookings)){				
 						foreach($curr_bookings as $id => $booking){
-							$p_address = pg_fetch_row(pg_execute($dbh, "pas", array($booking['address_id'])));
                         	$beds = pg_fetch_all(pg_execute($dbh, "bs", array($booking['property_id'])));
                         	$rules = pg_fetch_all(pg_execute($dbh, "rs", array($booking['property_id'])));
                         	$amenities = pg_fetch_all(pg_execute($dbh, "as", array($booking['property_id'])));
@@ -117,9 +115,9 @@
 									<p>Dates booked: '. $booking['start_date'] .' to '. $booking['end_date'] .'</p>
                                     <br/>
                                     <br/>
-                                    <h5>'. $p_address[0] .' '. $p_address[1] .' '. $p_address[2] .'</h5>
-                                    <h5>'. $p_address[3] .', '. $p_address[4] .', '. $p_address[5] .'</h5>
-									<h5>'. $p_address[6] .'</h5>
+                                    <h5>'. $booking['unit'] .' '. $booking['street_number'] .' '. $booking['street_name'] .'</h5>
+									<h5>'. $booking['city'] .', '. $booking['province'] .', '. $booking['country'] .'</h5>
+									<h5>'. $booking['postal_code'] .'</h5>
 									<br/>
 									<p> '. $booking['status'] .' payment of $'. $booking['amount'].' by '. $booking['payment_type'] . '</p>
                                 </div>
@@ -134,8 +132,7 @@
 				<?php
 					if(is_array($past_bookings)){				
 						foreach($past_bookings as $id => $booking){
-							$p_address = pg_fetch_row(pg_execute($dbh, "pas", array($booking['address_id'])));
-                        	$beds = pg_fetch_all(pg_execute($dbh, "bs", array($booking['property_id'])));
+							$beds = pg_fetch_all(pg_execute($dbh, "bs", array($booking['property_id'])));
                         	$rules = pg_fetch_all(pg_execute($dbh, "rs", array($booking['property_id'])));
                         	$amenities = pg_fetch_all(pg_execute($dbh, "as", array($booking['property_id'])));
 			
@@ -179,9 +176,9 @@
 									<p>Dates booked: '. $booking['start_date'] .' to '. $booking['end_date'] .'</p>
                                     <br/>
                                     <br/>
-                                    <h5>'. $p_address[0] .' '. $p_address[1] .' '. $p_address[2] .'</h5>
-                                    <h5>'. $p_address[3] .', '. $p_address[4] .', '. $p_address[5] .'</h5>
-									<h5>'. $p_address[6] .'</h5>
+                                    <h5>'. $booking['unit'] .' '. $booking['street_number'] .' '. $booking['street_name'] .'</h5>
+									<h5>'. $booking['city'] .', '. $booking['province'] .', '. $booking['country'] .'</h5>
+									<h5>'. $booking['postal_code'] .'</h5>
 									<br/>
 									<p> '. $booking['status'] .' payment of $'. $booking['amount'].' by '. $booking['payment_type'] . '</p>
                                 </div>

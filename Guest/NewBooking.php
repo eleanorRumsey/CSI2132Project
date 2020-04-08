@@ -92,7 +92,7 @@
 
             $agreement_result = pg_query("INSERT INTO rental_agreement (property_id, guest_id, host_id, document_link, signed, 
                                     signing_date, start_date, end_date, payment_id) VALUES ($property_id, $guest_id, $host_id, '$doc_link',
-                                    TRUE,  '$today', '$start_date', '$end_date', $payment_result)");
+                                    TRUE,  NOW(), '$start_date', '$end_date', $payment_result)");
             if(!$agreement_result){
                 die("Error in SQL query:" .pg_last_error());
             }

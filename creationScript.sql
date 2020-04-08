@@ -267,7 +267,7 @@ FOREIGN KEY (amenity_id) REFERENCES amenity (amenity_id)
 GRANT ALL ON TABLE property_amenities TO obore031;
 
 CREATE VIEW GuestListView AS 
-SELECT g.email, g.phone_number, n.first_name, n.middle_name, n.last_name,
+SELECT g.guest_id, g.email, g.phone_number, n.first_name, n.middle_name, n.last_name,
 	a.postal_code, a.street_number, a.unit, a.street_name, a.city, a.province, a.country
 FROM guest g
 	JOIN address a ON a.address_id = g.address_id

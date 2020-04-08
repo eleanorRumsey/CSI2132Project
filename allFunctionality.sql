@@ -45,7 +45,7 @@ FROM property p
 	JOIN property_type pt ON pt.property_type_id = p.property_type_id
 	JOIN address ad ON ad.address_id = p.address_id
 	JOIN address_type adt ON adt.address_type_id = ad.address_type_id
-WHERE adt.address_type = 'Rental property' AND ad.city LIKE '%<city>%'"
+WHERE adt.address_type = 'Rental property' AND ad.city LIKE %<city>%;
 
 --SEARCH PROPERTIES BY DATE--
 SELECT p.property_id, p.property_name, p.address_id, p.guest_capacity, p.num_bathrooms, p.num_bedrooms, p.next_available_date, 
@@ -97,14 +97,21 @@ UPDATE payment SET payment_type_id = <payment_type>, amount = <total>, status = 
 WHERE payment_id = <payment_id>;
 
 --VIEW ALL GUEST BOOKING ACTIVITY AS EMPLOYEE--
-SELECT p.property_id, p.address_id, p.property_name, p.rate, ra.guest_id, ra.start_date, ra.end_date, pm.amount, pmt.payment_type, 
+SELECT p.property_id, ad.country, p.property_name, p.rate, ra.signing_date, ra.guest_id, ra.start_date, ra.end_date, pm.amount, pmt.payment_type, 
 	pm.status, glv.first_name, glv.last_name, glv.postal_code as guest_postal_code
 FROM rental_agreement ra 
 	JOIN property p ON ra.property_id = p.property_id
 	JOIN payment pm on pm.payment_id = ra.payment_id
 	JOIN payment_type pmt on pmt.payment_type_id = pm.payment_type_id
-	JOIN guestlistview glv on glv.guest_id = ra.guest_id;
+	JOIN guestlistview glv on glv.guest_id = ra.guest_id
+	JOIN address ad ON ad.address_id = p.address_id
+	JOIN branch b ON b.country = ad.country
+WHERE b.country = <branch country>
+ORDER BY pmt.payment_type ASC, ra.signing_date DESC;
 
+--LEAVE REVIEW AS GUEST--
+INSERT INTO revie(guest_id, property_id, overall_rating, communication_rating, clean_rating, value_rating)
+VALUES(<guest>, <property>, <overall>, <communication>, <clean>, <value>);
 
 
 

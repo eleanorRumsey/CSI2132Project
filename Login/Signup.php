@@ -64,7 +64,7 @@
 			}
 		}
 		elseif($userType = 'host'){
-			$insert_host_sql = "INSERT INTO host (email, phone_number, address_id, active) VALUES ('$email', '$phone', $address_id, 'Y')";
+			$insert_host_sql = "INSERT INTO host (email, name_id, phone_number, address_id, active) VALUES ('$email', $name_id, '$phone', $address_id, 'Y')";
 			pg_query($dbh,$query3);
 			pg_query($dbh,$query4);
 		}

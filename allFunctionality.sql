@@ -17,14 +17,18 @@ INSERT INTO guest (address_id, name_id, email, phone_number) VALUES (<address_id
 INSERT INTO host (address_id, name_id, email, phone_number, active) VALUES (<address_id>, <name_id>, <email>, <phone>, 'Y');
 
 --VIEW ALL AVAILABLE PROPERTIES--
-SELECT p.property_id, p.property_name, p.property_type_id, p.room_type_id, p.address_id, p.guest_capacity, p.num_bathrooms, 
-	p.num_bedrooms, p.next_available_date, p.description, p.rate, p.active, p.image, pt.property_type, rt.room_type, 
-	ad.postal_code, ad.street_number, ad.unit, ad.street_name, ad.city, ad.province, ad.country
+SELECT p.property_id, p.property_name, p.address_id, p.guest_capacity, p.num_bathrooms, p.num_bedrooms, 
+p.next_available_date, p.description, p.rate, p.active, p.image, pt.property_type, rt.room_type, 
+rev_avg.avg_ovr, rev_avg.avg_comm, rev_avg.avg_clean, rev_avg.avg_val,
+ad.postal_code, ad.street_number, ad.unit, ad.street_name, ad.city, ad.province, ad.country
 FROM property p
-	JOIN room_type rt ON p.room_type_id = rt.room_type_id
-	JOIN property_type pt ON pt.property_type_id = p.property_type_id
-	JOIN address ad ON ad.address_id = p.address_id
-	JOIN address_type adt ON adt.address_type_id = ad.address_type_id
+JOIN room_type rt ON p.room_type_id = rt.room_type_id
+JOIN property_type pt ON pt.property_type_id = p.property_type_id
+JOIN address ad ON ad.address_id = p.address_id
+JOIN address_type adt ON adt.address_type_id = ad.address_type_id
+JOIN (SELECT property_id, avg(overall_rating) as avg_ovr, avg(communication_rating) as avg_comm, 
+	avg(clean_rating) as avg_clean, avg(value_rating) as avg_val FROM review GROUP BY property_id) 
+	as rev_avg on rev_avg.property_id = p.property_id
 WHERE adt.address_type = 'Rental property';
 
 --IN ANY PROPERTY SEARCH, VIEW BED SETUP--
@@ -37,25 +41,33 @@ SELECT rule_type FROM rules WHERE rule_id IN (SELECT rule_id FROM property_rules
 SELECT amenity_type FROM amenity WHERE amenity_id IN (SELECT amenity_id FROM property_amenities WHERE property_id = <property_id>);
 
 --SEARCH PROPERTIES BY CITY--
-SELECT p.property_id, p.property_name, p.address_id, p.guest_capacity, p.num_bathrooms, p.num_bedrooms, p.next_available_date, 
-	p.description, p.rate, p.active, p.image, pt.property_type, rt.room_type, ad.postal_code, ad.street_number, ad.unit, 
-	ad.street_name, ad.city, ad.province, ad.country
+SELECT p.property_id, p.property_name, p.address_id, p.guest_capacity, p.num_bathrooms, p.num_bedrooms, 
+p.next_available_date, p.description, p.rate, p.active, p.image, pt.property_type, rt.room_type, 
+rev_avg.avg_ovr, rev_avg.avg_comm, rev_avg.avg_clean, rev_avg.avg_val,
+ad.postal_code, ad.street_number, ad.unit, ad.street_name, ad.city, ad.province, ad.country
 FROM property p
-	JOIN room_type rt ON p.room_type_id = rt.room_type_id
-	JOIN property_type pt ON pt.property_type_id = p.property_type_id
-	JOIN address ad ON ad.address_id = p.address_id
-	JOIN address_type adt ON adt.address_type_id = ad.address_type_id
+JOIN room_type rt ON p.room_type_id = rt.room_type_id
+JOIN property_type pt ON pt.property_type_id = p.property_type_id
+JOIN address ad ON ad.address_id = p.address_id
+JOIN address_type adt ON adt.address_type_id = ad.address_type_id
+JOIN (SELECT property_id, avg(overall_rating) as avg_ovr, avg(communication_rating) as avg_comm, 
+	avg(clean_rating) as avg_clean, avg(value_rating) as avg_val FROM review GROUP BY property_id) 
+	as rev_avg on rev_avg.property_id = p.property_id
 WHERE adt.address_type = 'Rental property' AND ad.city LIKE %<city>%;
 
 --SEARCH PROPERTIES BY DATE--
-SELECT p.property_id, p.property_name, p.address_id, p.guest_capacity, p.num_bathrooms, p.num_bedrooms, p.next_available_date, 
-	p.description, p.rate, p.active, p.image, pt.property_type, rt.room_type, ad.postal_code, ad.street_number, ad.unit, 
-	ad.street_name, ad.city, ad.province, ad.country
+SELECT p.property_id, p.property_name, p.address_id, p.guest_capacity, p.num_bathrooms, p.num_bedrooms, 
+p.next_available_date, p.description, p.rate, p.active, p.image, pt.property_type, rt.room_type, 
+rev_avg.avg_ovr, rev_avg.avg_comm, rev_avg.avg_clean, rev_avg.avg_val,
+ad.postal_code, ad.street_number, ad.unit, ad.street_name, ad.city, ad.province, ad.country
 FROM property p
-	JOIN room_type rt ON p.room_type_id = rt.room_type_id
-	JOIN property_type pt ON pt.property_type_id = p.property_type_id
-	JOIN address ad ON ad.address_id = p.address_id
-	JOIN address_type adt ON adt.address_type_id = ad.address_type_id
+JOIN room_type rt ON p.room_type_id = rt.room_type_id
+JOIN property_type pt ON pt.property_type_id = p.property_type_id
+JOIN address ad ON ad.address_id = p.address_id
+JOIN address_type adt ON adt.address_type_id = ad.address_type_id
+JOIN (SELECT property_id, avg(overall_rating) as avg_ovr, avg(communication_rating) as avg_comm, 
+	avg(clean_rating) as avg_clean, avg(value_rating) as avg_val FROM review GROUP BY property_id) 
+	as rev_avg on rev_avg.property_id = p.property_id
 WHERE adt.address_type = 'Rental property' AND p.next_available_date < <date>;
 
 --VIEW CURRENT AND UPCOMING BOOKINGS AS A GUEST--
@@ -113,7 +125,20 @@ ORDER BY pmt.payment_type ASC, ra.signing_date DESC;
 INSERT INTO revie(guest_id, property_id, overall_rating, communication_rating, clean_rating, value_rating)
 VALUES(<guest>, <property>, <overall>, <communication>, <clean>, <value>);
 
-
+--VIEW ALL HOSTED PROPERTIES AND REVIEWS AS HOST--
+SELECT p.property_id, p.property_name, p.address_id, p.guest_capacity, p.num_bathrooms, p.num_bedrooms, 
+p.next_available_date, p.description, p.rate, p.active, p.image, pt.property_type, rt.room_type, 
+rev_avg.avg_ovr, rev_avg.avg_comm, rev_avg.avg_clean, rev_avg.avg_val,
+ad.postal_code, ad.street_number, ad.unit, ad.street_name, ad.city, ad.province, ad.country
+FROM property p
+	JOIN room_type rt ON p.room_type_id = rt.room_type_id
+	JOIN property_type pt ON pt.property_type_id = p.property_type_id
+	JOIN address ad ON ad.address_id = p.address_id
+	JOIN address_type adt ON adt.address_type_id = ad.address_type_id
+	JOIN (SELECT property_id, avg(overall_rating) as avg_ovr, avg(communication_rating) as avg_comm, 
+		  avg(clean_rating) as avg_clean, avg(value_rating) as avg_val FROM review GROUP BY property_id) 
+		as rev_avg on rev_avg.property_id = p.property_id
+WHERE p.host_id = <host_id>;
 
 
 

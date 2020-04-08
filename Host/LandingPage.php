@@ -5,23 +5,22 @@
 
     $host_id = $_SESSION['user_id'];
     
-    $properties_sql = "SELECT p.property_id, p.property_name, p.property_type_id, p.room_type_id, p.address_id, p,guest_capacity, p.num_bathrooms, p.num_bedrooms, 
-                    p.next_available_date, p.description, p.rate, p.active, p.image 
-                    FROM property p WHERE host_id = $1";
-    $property_stmt = pg_prepare($dbh, "ps", $properties_sql);
-    $property_result = pg_execute($dbh, "ps", array($host_id));
-    if(!$property_result){
-        die("Error in SQL query:" .pg_last_error());
+    $properties_stmt = pg_query("SELECT p.property_id, p.property_name, p.address_id, p.guest_capacity, p.num_bathrooms, p.num_bedrooms, 
+                        p.next_available_date, p.description, p.rate, p.active, p.image, pt.property_type, rt.room_type, 
+                        rev_avg.avg_ovr, rev_avg.avg_comm, rev_avg.avg_clean, rev_avg.avg_val,
+                        ad.postal_code, ad.street_number, ad.unit, ad.street_name, ad.city, ad.province, ad.country
+                        FROM property p
+                            JOIN room_type rt ON p.room_type_id = rt.room_type_id
+                            JOIN property_type pt ON pt.property_type_id = p.property_type_id
+                            JOIN address ad ON ad.address_id = p.address_id
+                            JOIN address_type adt ON adt.address_type_id = ad.address_type_id
+                            JOIN (SELECT property_id, avg(overall_rating) as avg_ovr, avg(communication_rating) as avg_comm, 
+                                avg(clean_rating) as avg_clean, avg(value_rating) as avg_val FROM review GROUP BY property_id) 
+                                as rev_avg on rev_avg.property_id = p.property_id
+                        WHERE p.host_id = $host_id;");
+    if($properties_stmt){
+        $properties = pg_fetch_all($properties_stmt);
     }
-
-    $property_type_sql = "SELECT property_type FROM property_type WHERE property_type_id = $1";
-    $p_type_stmt = pg_prepare($dbh, "pts", $property_type_sql);
-
-    $room_type_sql = "SELECT room_type FROM room_type WHERE room_type_id = $1";
-    $r_type_stmt = pg_prepare($dbh, "rts", $room_type_sql);
-
-    $p_address_sql = "SELECT unit, street_number, street_name, city, province, country, postal_code FROM address WHERE address_id =$1";
-    $p_address_stmt = pg_prepare($dbh, "pas", $p_address_sql);
 
     $beds_sql = "SELECT bed_type, num_of_beds FROM bed_setup WHERE property_id = $1";
     $beds_stmt = pg_prepare($dbh, "bs", $beds_sql);
@@ -51,75 +50,75 @@
             </nav>
             <div class="main-container">
                 <?php
-                    $propertyArr = pg_fetch_all($property_result);
-
-                    foreach($propertyArr as $array){
-                        $img_path = "../Images/" . $array['image'];
-                        
-                        $p_type_result = pg_execute($dbh, "pts", array($array['property_type_id'])); 
-                        $r_type_result = pg_execute($dbh, "rts", array($array['room_type_id']));
-                        $p_address_result = pg_execute($dbh, "pas", array($array['address_id']));
-                        $beds_result = pg_execute($dbh, "bs", array($array['property_id']));
-                        $rules_result = pg_execute($dbh, "rs", array($array['property_id']));
-                        $amenities_result = pg_execute($dbh, "as", array($array['property_id']));
-                        
-                        if(!$p_type_result | !$r_type_result | !$p_address_result | !$beds_result | !$rules_result | !$amenities_result) {
-                            die("Error in SQL query:" .pg_last_error());
-                        }
-
-                        $p_type = pg_fetch_row($p_type_result);
-                        $r_type = pg_fetch_row($r_type_result);
-                        $p_address = pg_fetch_row($p_address_result);
-                        $beds = pg_fetch_all($beds_result);
-                        $rules = pg_fetch_all($rules_result);  
-                        $amenities = pg_fetch_all($amenities_result);  
-
-                        $bedstring = "";
-                        if(is_array($beds)) {
-                            foreach($beds as $b_setup){
-                                $btype = $b_setup['bed_type'];
-                                $bnum = $b_setup['num_of_beds'];
-                                $bedstring .= $btype . " beds : " . $bnum . " ";
+                    if(is_array($properties)){
+                        foreach($properties as $array){
+                            $img_path = "../Images/" . $array['image'];
+                            
+                            $beds_result = pg_execute($dbh, "bs", array($array['property_id']));
+                            $rules_result = pg_execute($dbh, "rs", array($array['property_id']));
+                            $amenities_result = pg_execute($dbh, "as", array($array['property_id']));
+                            
+                            if(!$beds_result | !$rules_result | !$amenities_result) {
+                                die("Error in SQL query:" .pg_last_error());
                             }
-                        }
 
-                        $rulestring = "";
-                        if(is_array($rules)){
-                            foreach($rules as $rule){
-                                $rulestring .= $rule['rule_type'] . " ";
-                            }
-                        }
-                        
-                        $amenitystring = "";
-                        if(is_array($amenities)){
-                            foreach($amenities as $amenity){
-                                $amenitystring .= $amenity['amenity_type'] . " ";
-                            }
-                        }
+                            $beds = pg_fetch_all($beds_result);
+                            $rules = pg_fetch_all($rules_result);  
+                            $amenities = pg_fetch_all($amenities_result);  
 
-                        echo '<div class="property">
-                                <div class="image-desc">
-                                    <img src = "'.$img_path.'" class="property-image"/>
-                                    <div class="property-info">
-                                        <h3>'. $array['property_name'] .'</h3>
-                                        <h5>'. $p_type[0] .', '. $r_type[0] .', $'. $array['rate'] .'/nt</h5>
-                                        <div>'. $array['num_bedrooms'].' bedroom, '. $array['num_bathrooms'] .' bathroom</div>
-                                        <div>'. $array['description'].'</div>
-                                        <div>'. $bedstring .'</div>
-                                        <div>'. $rulestring .'</div>
-                                        <div>'. $amenitystring .'</div>
+                            $bedstring = "";
+                            if(is_array($beds)) {
+                                foreach($beds as $b_setup){
+                                    $btype = $b_setup['bed_type'];
+                                    $bnum = $b_setup['num_of_beds'];
+                                    $bedstring .= $btype . " beds : " . $bnum . " ";
+                                }
+                            }
+
+                            $rulestring = "";
+                            if(is_array($rules)){
+                                foreach($rules as $rule){
+                                    $rulestring .= $rule['rule_type'] . " ";
+                                }
+                            }
+                            
+                            $amenitystring = "";
+                            if(is_array($amenities)){
+                                foreach($amenities as $amenity){
+                                    $amenitystring .= $amenity['amenity_type'] . " ";
+                                }
+                            }
+
+                            echo '<div class="property">
+                                    <div class="image-desc">
+                                        <img src = "'.$img_path.'" class="property-image"/>
+                                        <div class="property-info">
+                                            <h3>'. $array['property_name'] .'</h3>
+                                            <h5>'. $array['property_type'] .', '. $array['room_type'] .', $'. $array['rate'] .'/nt</h5>
+                                            <div>'. $array['num_bedrooms'].' bedroom, '. $array['num_bathrooms'] .' bathroom</div>
+                                            <div>'. $array['description'].'</div>
+                                            <div>'. $bedstring .'</div>
+                                            <div>'. $rulestring .'</div>
+                                            <div>'. $amenitystring .'</div>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="address-date">
-                                    <p> Available: '. $array["next_available_date"] .'</p>
-                                    <br/>
-                                    <br/>
-                                    <h5>'. $p_address[0] .' '. $p_address[1] .' '. $p_address[2] .'</h5>
-                                    <h5>'. $p_address[3] .', '. $p_address[4] .', '. $p_address[5] .'</h5>
-                                    <h5>'. $p_address[6] .'</h5>
-                                </div>
-                              </div>';
-                        
+                                    <div class="address-date">
+                                        <p> Available: '. $array["next_available_date"] .'</p>
+                                        <br/>
+                                        <br/>
+                                        <h5>'. $array['unit'] .' '. $array['street_number'] .' '. $array['street_name'] .'</h5>
+                                        <h5>'. $array['city'] .', '. $array['province'] .', '. $array['country'] .'</h5>
+                                        <h5>'. $array['postal_code'] .'</h5>
+                                        <br/>
+                                        <p>REVIEWS</p>
+                                        <div>Overall: '. round($array['avg_ovr'], 2).'</div>
+                                        <div>Cleanliness: '. round($array['avg_clean'], 2) .'</div>
+                                        <div>Communication: '. round($array['avg_comm'], 2).'</div>
+                                        <div>Value: '. round($array['avg_val'], 2).'</div>
+                                    </div>
+                                </div>';
+                            
+                        }
                     }
                 ?>
             </div>

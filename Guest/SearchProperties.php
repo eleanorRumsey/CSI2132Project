@@ -21,15 +21,19 @@
 		$citySearchq = $_POST['citySearch'];
 		$citySearchq = preg_replace("#[^a-z]#i","",$citySearchq);
 
-		$filter_properties_stmt = pg_query("SELECT p.property_id, p.property_name, p.address_id, p.guest_capacity, p.num_bathrooms, 
-						p.num_bedrooms, p.next_available_date, p.description, p.rate, p.active, p.image, pt.property_type, rt.room_type, 
-						ad.postal_code, ad.street_number, ad.unit, ad.street_name, ad.city, ad.province, ad.country
-					FROM property p
-						JOIN room_type rt ON p.room_type_id = rt.room_type_id
-						JOIN property_type pt ON pt.property_type_id = p.property_type_id
-						JOIN address ad ON ad.address_id = p.address_id
-						JOIN address_type adt ON adt.address_type_id = ad.address_type_id
-					WHERE adt.address_type = 'Rental property' AND ad.city LIKE '%$citySearchq%'");
+		$filter_properties_stmt = pg_query("SELECT p.property_id, p.property_name, p.address_id, p.guest_capacity, p.num_bathrooms, p.num_bedrooms, 
+											p.next_available_date, p.description, p.rate, p.active, p.image, pt.property_type, rt.room_type, 
+											rev_avg.avg_ovr, rev_avg.avg_comm, rev_avg.avg_clean, rev_avg.avg_val,
+											ad.postal_code, ad.street_number, ad.unit, ad.street_name, ad.city, ad.province, ad.country
+											FROM property p
+												JOIN room_type rt ON p.room_type_id = rt.room_type_id
+												JOIN property_type pt ON pt.property_type_id = p.property_type_id
+												JOIN address ad ON ad.address_id = p.address_id
+												JOIN address_type adt ON adt.address_type_id = ad.address_type_id
+												JOIN (SELECT property_id, avg(overall_rating) as avg_ovr, avg(communication_rating) as avg_comm, 
+													avg(clean_rating) as avg_clean, avg(value_rating) as avg_val FROM review GROUP BY property_id) 
+													as rev_avg on rev_avg.property_id = p.property_id
+											WHERE adt.address_type = 'Rental property' AND ad.city LIKE '%$citySearchq%'");
 	
 		$count = pg_num_rows($filter_properties_stmt);
 		if($count == 0){
@@ -85,6 +89,12 @@
 									<h5>'. $property['unit'] .' '. $property['street_number'] .' '. $property['street_name'] .'</h5>
 									<h5>'. $property['city'] .', '. $property['province'] .', '. $property['country'] .'</h5>
 									<h5>'. $property['postal_code'] .'</h5>
+									<br/>
+									<p>REVIEWS</p>
+									<div>Overall: '. round($property['avg_ovr'], 2).'</div>
+									<div>Cleanliness: '. round($property['avg_clean'], 2) .'</div>
+									<div>Communication: '. round($property['avg_comm'], 2).'</div>
+									<div>Value: '. round($property['avg_val'], 2).'</div>
 									<button type="submit" class="btn btn-primary" name="book-property">Book Now!</button>
 								</div>
 							</div>
@@ -92,15 +102,19 @@
 			}
 		}
 	} elseif(isset($_POST['search-btn']) && empty($_POST['citySearch'])) {
-		$all_properties_stmt = pg_query("SELECT p.property_id, p.property_name, p.property_type_id, p.room_type_id, p.address_id, p.guest_capacity, p.num_bathrooms, 
-						p.num_bedrooms, p.next_available_date, p.description, p.rate, p.active, p.image, pt.property_type, rt.room_type, 
-						ad.postal_code, ad.street_number, ad.unit, ad.street_name, ad.city, ad.province, ad.country
-					FROM property p
-						JOIN room_type rt ON p.room_type_id = rt.room_type_id
-						JOIN property_type pt ON pt.property_type_id = p.property_type_id
-						JOIN address ad ON ad.address_id = p.address_id
-						JOIN address_type adt ON adt.address_type_id = ad.address_type_id
-					WHERE adt.address_type = 'Rental property'");
+		$all_properties_stmt = pg_query("SELECT p.property_id, p.property_name, p.address_id, p.guest_capacity, p.num_bathrooms, p.num_bedrooms, 
+										p.next_available_date, p.description, p.rate, p.active, p.image, pt.property_type, rt.room_type, 
+										rev_avg.avg_ovr, rev_avg.avg_comm, rev_avg.avg_clean, rev_avg.avg_val,
+										ad.postal_code, ad.street_number, ad.unit, ad.street_name, ad.city, ad.province, ad.country
+										FROM property p
+											JOIN room_type rt ON p.room_type_id = rt.room_type_id
+											JOIN property_type pt ON pt.property_type_id = p.property_type_id
+											JOIN address ad ON ad.address_id = p.address_id
+											JOIN address_type adt ON adt.address_type_id = ad.address_type_id
+											JOIN (SELECT property_id, avg(overall_rating) as avg_ovr, avg(communication_rating) as avg_comm, 
+												avg(clean_rating) as avg_clean, avg(value_rating) as avg_val FROM review GROUP BY property_id) 
+												as rev_avg on rev_avg.property_id = p.property_id
+										WHERE adt.address_type = 'Rental property'");
 	
 		$all_properties = pg_fetch_all($all_properties_stmt);
 
@@ -156,6 +170,12 @@
 									<h5>'. $property['unit'] .' '. $property['street_number'] .' '. $property['street_name'] .'</h5>
 									<h5>'. $property['city'] .', '. $property['province'] .', '. $property['country'] .'</h5>
 									<h5>'. $property['postal_code'] .'</h5>
+									<br/>
+									<p>REVIEWS</p>
+									<div>Overall: '. round($property['avg_ovr'], 2).'</div>
+									<div>Cleanliness: '. round($property['avg_clean'], 2) .'</div>
+									<div>Communication: '. round($property['avg_comm'], 2).'</div>
+									<div>Value: '. round($property['avg_val'], 2).'</div>
 									<button type="submit" class="btn btn-primary" name="book-property">Book Now!</button>
 								</div>
 							</div>

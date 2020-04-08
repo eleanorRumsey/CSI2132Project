@@ -72,4 +72,17 @@ WITH manager_name AS(INSERT INTO person_name(first_name, middle_name, last_name)
 UPDATE branch SET branch_manager =(SELECT employee_id FROM manager_id) 
 	WHERE branch_id = (SELECT branch_id FROM branch WHERE country = 'United States');
 
+--Reviews--
+select * from property;
 
+INSERT INTO review(guest_id, property_id, overall_rating, communication_rating, clean_rating, value_rating)
+VALUES(1, 1, 4, 5, 4, 4);
+
+INSERT INTO review(guest_id, property_id, overall_rating, communication_rating, clean_rating, value_rating)
+VALUES(1, 2, 3, 3, 5, 4);
+
+INSERT INTO review(guest_id, property_id, overall_rating, communication_rating, clean_rating, value_rating)
+VALUES(2, 1, 3, 3, 3, 2);
+
+INSERT INTO review(guest_id, property_id, overall_rating, communication_rating, clean_rating, value_rating)
+VALUES(2, 2, 4, 4, 4, 4);

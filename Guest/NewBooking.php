@@ -126,7 +126,9 @@
         <div class="page">
             <nav class="nav flex-column">
                 <a class="nav-link" href="SearchProperties.php">Search Properties</a>
-                <a class="nav-link" href="#">My Bookings</a>
+				<a class="nav-link" href="CurrentBookings.php">My Bookings</a>
+				<a class="nav-link" href="EditProfile.php">Edit Profile</a>
+            </nav>
             </nav>
             <form class="main-container" method="post">
                 <h3>Booking</h3>

@@ -26,7 +26,7 @@ JOIN room_type rt ON p.room_type_id = rt.room_type_id
 JOIN property_type pt ON pt.property_type_id = p.property_type_id
 JOIN address ad ON ad.address_id = p.address_id
 JOIN address_type adt ON adt.address_type_id = ad.address_type_id
-JOIN (SELECT property_id, avg(overall_rating) as avg_ovr, avg(communication_rating) as avg_comm, 
+LEFT JOIN (SELECT property_id, avg(overall_rating) as avg_ovr, avg(communication_rating) as avg_comm, 
 	avg(clean_rating) as avg_clean, avg(value_rating) as avg_val FROM review GROUP BY property_id) 
 	as rev_avg on rev_avg.property_id = p.property_id
 WHERE adt.address_type = 'Rental property';
@@ -50,7 +50,7 @@ JOIN room_type rt ON p.room_type_id = rt.room_type_id
 JOIN property_type pt ON pt.property_type_id = p.property_type_id
 JOIN address ad ON ad.address_id = p.address_id
 JOIN address_type adt ON adt.address_type_id = ad.address_type_id
-JOIN (SELECT property_id, avg(overall_rating) as avg_ovr, avg(communication_rating) as avg_comm, 
+LEFT JOIN (SELECT property_id, avg(overall_rating) as avg_ovr, avg(communication_rating) as avg_comm, 
 	avg(clean_rating) as avg_clean, avg(value_rating) as avg_val FROM review GROUP BY property_id) 
 	as rev_avg on rev_avg.property_id = p.property_id
 WHERE adt.address_type = 'Rental property' AND ad.city LIKE %<city>%;
@@ -65,7 +65,7 @@ JOIN room_type rt ON p.room_type_id = rt.room_type_id
 JOIN property_type pt ON pt.property_type_id = p.property_type_id
 JOIN address ad ON ad.address_id = p.address_id
 JOIN address_type adt ON adt.address_type_id = ad.address_type_id
-JOIN (SELECT property_id, avg(overall_rating) as avg_ovr, avg(communication_rating) as avg_comm, 
+LEFT JOIN (SELECT property_id, avg(overall_rating) as avg_ovr, avg(communication_rating) as avg_comm, 
 	avg(clean_rating) as avg_clean, avg(value_rating) as avg_val FROM review GROUP BY property_id) 
 	as rev_avg on rev_avg.property_id = p.property_id
 WHERE adt.address_type = 'Rental property' AND p.next_available_date <= <date>;
@@ -135,7 +135,7 @@ FROM property p
 	JOIN property_type pt ON pt.property_type_id = p.property_type_id
 	JOIN address ad ON ad.address_id = p.address_id
 	JOIN address_type adt ON adt.address_type_id = ad.address_type_id
-	JOIN (SELECT property_id, avg(overall_rating) as avg_ovr, avg(communication_rating) as avg_comm, 
+	LEFT JOIN (SELECT property_id, avg(overall_rating) as avg_ovr, avg(communication_rating) as avg_comm, 
 		  avg(clean_rating) as avg_clean, avg(value_rating) as avg_val FROM review GROUP BY property_id) 
 		as rev_avg on rev_avg.property_id = p.property_id
 WHERE p.host_id = <host_id>;
@@ -149,9 +149,13 @@ FROM rental_agreement ra
 	JOIN payment pm ON pm.payment_id = ra.payment_id
 	JOIN payment_type pmt ON pmt.payment_type_id = pm.payment_type_id
 	JOIN guestlistview glv ON glv.guest_id = ra.guest_id
-	JOIN review r ON (r.property_id = p.property_id AND r.guest_id = ra.guest_id)
+	LEFT JOIN review r ON (r.property_id = p.property_id AND r.guest_id = ra.guest_id)
 WHERE ra.host_id = <host_id>
-ORDER BY pmt.payment_type ASC, ra.signing_date DESC
+ORDER BY pmt.payment_type ASC, ra.signing_date DESC;
 
+--UPDATE GUEST/HOST INFO--
+UPDATE guest SET email=<email>, phone_number = <phone_number> WHERE guest_id=<guest_id>;
+UPDATE host SET email=<email>, phone_number = <phone_number> WHERE host_id=<host_id>;
 
+UPDATE person_name SET first_name=<first>, last_name=<middle>, middle_name=<last> WHERE name_id = <name_id>;
 	

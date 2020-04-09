@@ -152,6 +152,7 @@
                 <a class="nav-link" href="LandingPage.php">My properties</a>
                 <a class="nav-link" href="#">New property</a>
                 <a class="nav-link" href="History.php">History</a>
+                <a class="nav-link" href="EditUser.php">Edit profile</a>
             </nav>
             <div class="main-container">
                 <form id="new-property-form" name="property-form" method="post" action="">

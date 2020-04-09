@@ -15,7 +15,7 @@
                                             JOIN payment pm ON pm.payment_id = ra.payment_id
                                             JOIN payment_type pmt ON pmt.payment_type_id = pm.payment_type_id
                                             JOIN guestlistview glv ON glv.guest_id = ra.guest_id
-                                            JOIN review r ON (r.property_id = p.property_id AND r.guest_id = ra.guest_id)
+                                            LEFT JOIN review r ON (r.property_id = p.property_id AND r.guest_id = ra.guest_id)
                                         WHERE ra.host_id = $host_id
                                         ORDER BY pmt.payment_type ASC, ra.signing_date DESC");
     
@@ -87,8 +87,10 @@
         </div>
         <div class="page">
             <nav class="nav flex-column">
-                <a class="nav-link" href="#">Search Properties</a>
-                <a class="nav-link" href="CurrentBookings.php">My Bookings</a>
+                <a class="nav-link" href="LandingPage.php">My properties</a>
+                <a class="nav-link" href="NewProperty.php">New property</a>
+                <a class="nav-link" href="#">History</a>
+                <a class="nav-link" href="EditProfile.php">Edit profile</a>
             </nav>
             <div class="main-container">
                 <h3>Activity for hosted properties</h3>

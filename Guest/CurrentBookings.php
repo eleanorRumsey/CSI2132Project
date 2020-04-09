@@ -22,7 +22,7 @@
 										JOIN address ad ON ad.address_id = p.address_id
 									WHERE ra.guest_id = $guest_id AND end_date >= NOW()");
 
-	if($curr_bookings_stmt){
+	if(pg_num_rows($curr_bookings_stmt) > 0){
 		$curr_bookings = pg_fetch_all($curr_bookings_stmt);
 	}
 
@@ -64,12 +64,13 @@
         <div class="page">
             <nav class="nav flex-column">
                 <a class="nav-link" href="SearchProperties.php">Search Properties</a>
-                <a class="nav-link" href="#">My Bookings</a>
+				<a class="nav-link" href="#">My Bookings</a>
+				<a class="nav-link" href="EditProfile.php">Edit Profile</a>
             </nav>
             <div class="main-container">
                 <h3>Upcoming Bookings:</h3>
 				<?php
-					if(is_array($curr_bookings)){				
+					if(pg_num_rows($curr_bookings_stmt) > 0 && is_array($curr_bookings)){				
 						foreach($curr_bookings as $id => $booking){
                         	$beds = pg_fetch_all(pg_execute($dbh, "bs", array($booking['property_id'])));
                         	$rules = pg_fetch_all(pg_execute($dbh, "rs", array($booking['property_id'])));
@@ -124,10 +125,10 @@
                               </div>';
 						}
 					} else {
-						echo $past_bookings;
+						echo $curr_bookings;
 					}
 				?>
-				<br/>
+				<br/><br/>
 				<h3>Past Bookings:</h3>
 				<?php
 					if(is_array($past_bookings)){				
@@ -190,7 +191,6 @@
 				?>
             </div>
         </div>
-		
         <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>

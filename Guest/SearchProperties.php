@@ -80,7 +80,8 @@
 	//Search by city
     if(isset($_POST['city-search-btn']) && !empty($_POST['citySearch'])){
 		$citySearchq = $_POST['citySearch'];
-		$citySearchq = preg_replace("#[^a-z]#i","",$citySearchq);
+
+		print_r($citySearchq);
 
 		$filter_properties_city_stmt = pg_query("SELECT p.property_id, p.property_name, p.address_id, p.guest_capacity, p.num_bathrooms, p.num_bedrooms, 
 											p.next_available_date, p.description, p.rate, p.active, p.image, pt.property_type, rt.room_type, 
@@ -94,7 +95,7 @@
 												JOIN (SELECT property_id, avg(overall_rating) as avg_ovr, avg(communication_rating) as avg_comm, 
 													avg(clean_rating) as avg_clean, avg(value_rating) as avg_val FROM review GROUP BY property_id) 
 													as rev_avg on rev_avg.property_id = p.property_id
-											WHERE adt.address_type = 'Rental property' AND ad.city LIKE '%$citySearchq%'");
+											WHERE adt.address_type = 'Rental property' AND ad.city = $citySearchq");
 	
 		$count = pg_num_rows($filter_properties_city_stmt);
 		if($count == 0){
@@ -134,7 +135,9 @@
 			}
 		}
 
-	} elseif((isset($_POST['city-search-btn']) && empty($_POST['citySearch'])) || (isset($_POST['date-search-btn']) && empty($_POST['dateSearch']))) {
+	} elseif((isset($_POST['city-search-btn']) && empty($_POST['citySearch'])) || 
+				(isset($_POST['date-search-btn']) && empty($_POST['dateSearch'])) ||
+				(!isset($_POST['city-search-btn']) && !isset($_POST['date-search-btn']))) {
 		$all_properties_stmt = pg_query("SELECT p.property_id, p.property_name, p.address_id, p.guest_capacity, p.num_bathrooms, p.num_bedrooms, 
 										p.next_available_date, p.description, p.rate, p.active, p.image, pt.property_type, rt.room_type, 
 										rev_avg.avg_ovr, rev_avg.avg_comm, rev_avg.avg_clean, rev_avg.avg_val,
@@ -174,8 +177,10 @@
         </div>
         <div class="page">
             <nav class="nav flex-column">
-                <a class="nav-link" href="#">Search Properties</a>
-                <a class="nav-link" href="CurrentBookings.php">My Bookings</a>
+				<a class="nav-link" href="SearchProperties.php">Search Properties</a>
+				<a class="nav-link" href="CurrentBookings.php">My Bookings</a>
+				<a class="nav-link" href="EditProfile.php">Edit Profile</a>
+            </nav>
             </nav>
             <div class="main-container">
                 <h3>Enter Search Criteria</h3>

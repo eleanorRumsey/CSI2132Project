@@ -1,9 +1,15 @@
+--THE SQL SCRIPT FOR THE DDL STATEMENTS AND PERMISSION GRANTING--
+
 CREATE TABLE rules
 (rule_id SERIAL, 
 rule_type VARCHAR(10) NOT NULL,
 PRIMARY KEY (rule_id));
 
 GRANT ALL ON TABLE rules TO obore031;
+GRANT ALL ON TABLE rules TO tmukt088;
+GRANT ALL ON TABLE rules TO srui010;
+GRANT ALL ON TABLE rules TO rendl026;
+GRANT ALL ON TABLE rules TO ajain036;
 
 CREATE TABLE payment_type
 (payment_type_id SERIAL,
@@ -11,6 +17,10 @@ payment_type VARCHAR(10) NOT NULL,
 PRIMARY KEY(payment_type_id));
 
 GRANT ALL ON TABLE payment_type TO obore031;
+GRANT ALL ON TABLE payment_type TO tmukt088;
+GRANT ALL ON TABLE payment_type TO srui010;
+GRANT ALL ON TABLE payment_type TO rendl026;
+GRANT ALL ON TABLE payment_type TO ajain036;
 
 CREATE TABLE address_type
 (address_type_id SERIAL, 
@@ -18,6 +28,10 @@ address_type VARCHAR(18) NOT NULL,
 PRIMARY KEY(address_type_id));
 
 GRANT ALL ON TABLE address_type TO obore031;
+GRANT ALL ON TABLE address_type TO tmukt088;
+GRANT ALL ON TABLE address_type TO srui010;
+GRANT ALL ON TABLE address_type TO rendl026;
+GRANT ALL ON TABLE address_type TO ajain036;
 
 CREATE TABLE person_name
 (name_id SERIAL, 
@@ -27,6 +41,10 @@ last_name VARCHAR(50) NOT NULL,
 PRIMARY KEY(name_id));
 
 GRANT ALL ON TABLE person_name TO obore031;
+GRANT ALL ON TABLE person_name TO tmukt088;
+GRANT ALL ON TABLE person_name TO srui010;
+GRANT ALL ON TABLE person_name TO rendl026;
+GRANT ALL ON TABLE person_name TO ajain036;
 
 CREATE TABLE amenity
 (amenity_id SERIAL, 
@@ -34,6 +52,10 @@ amenity_type VARCHAR(10) NOT NULL,
 PRIMARY KEY(amenity_id));
 
 GRANT ALL ON TABLE amenity TO obore031;
+GRANT ALL ON TABLE amenity TO tmukt088;
+GRANT ALL ON TABLE amenity TO srui010;
+GRANT ALL ON TABLE amenity TO rendl026;
+GRANT ALL ON TABLE amenity TO ajain036;
 
 CREATE TABLE company_position 
 (position_id SERIAL, 
@@ -41,6 +63,10 @@ position_type VARCHAR(16) NOT NULL,
 PRIMARY KEY (position_id));
 
 GRANT ALL ON TABLE company_position TO obore031;
+GRANT ALL ON TABLE company_position TO tmukt088;
+GRANT ALL ON TABLE company_position TO srui010;
+GRANT ALL ON TABLE company_position TO rendl026;
+GRANT ALL ON TABLE company_position TO ajain036;
 
 CREATE TABLE property_type
 (property_type_id SERIAL, 
@@ -48,6 +74,10 @@ property_type VARCHAR(9) NOT NULL,
 PRIMARY KEY (property_type_id));
 
 GRANT ALL ON TABLE property_type TO obore031;
+GRANT ALL ON TABLE property_type TO tmukt088;
+GRANT ALL ON TABLE property_type TO srui010;
+GRANT ALL ON TABLE property_type TO rendl026;
+GRANT ALL ON TABLE property_type TO ajain036;
 
 CREATE TABLE room_type
 (room_type_id SERIAL, 
@@ -55,6 +85,10 @@ room_type VARCHAR (15) NOT NULL,
 PRIMARY KEY (room_type_id));
 
 GRANT ALL ON TABLE room_type TO obore031;
+GRANT ALL ON TABLE room_type TO tmukt088;
+GRANT ALL ON TABLE room_type TO srui010;
+GRANT ALL ON TABLE room_type TO rendl026;
+GRANT ALL ON TABLE room_type TO ajain036;
 
 CREATE TABLE address
 (address_id SERIAL,
@@ -76,6 +110,10 @@ CHECK (province IN ('NS', 'NB', 'PE', 'NL', 'QC', 'ON', 'MB','SK', 'AB', 'BC', '
 					'WA','WI','WV','WY')));
 					
 GRANT ALL ON TABLE address TO obore031;
+GRANT ALL ON TABLE address TO tmukt088;
+GRANT ALL ON TABLE address TO srui010;
+GRANT ALL ON TABLE address TO rendl026;
+GRANT ALL ON TABLE address TO ajain036;
 
 CREATE TABLE host 
 (host_id SERIAL, 
@@ -93,6 +131,10 @@ CHECK (active IN('Y','N')),
 CHECK (email LIKE '%_@__%.__%'));
 
 GRANT ALL ON TABLE host TO obore031;
+GRANT ALL ON TABLE host TO tmukt088;
+GRANT ALL ON TABLE host TO srui010;
+GRANT ALL ON TABLE host TO rendl026;
+GRANT ALL ON TABLE host TO ajain036;
 
 CREATE TABLE guest
 (guest_id SERIAL, 
@@ -108,6 +150,10 @@ FOREIGN KEY (name_ID) REFERENCES person_name (name_id)
 CHECK (email LIKE '%_@__%.__%'));
 
 GRANT ALL ON TABLE guest TO obore031;
+GRANT ALL ON TABLE guest TO tmukt088;
+GRANT ALL ON TABLE guest TO srui010;
+GRANT ALL ON TABLE guest TO rendl026;
+GRANT ALL ON TABLE guest TO ajain036;
 
 CREATE TABLE payment
 (payment_id SERIAL, 
@@ -126,6 +172,10 @@ FOREIGN KEY (payment_type_id) REFERENCES payment_type (payment_type_id)
 CHECK (status IN ('Approved','Completed','Pending','Declined')));
 
 GRANT ALL ON TABLE payment TO obore031;
+GRANT ALL ON TABLE payment TO tmukt088;
+GRANT ALL ON TABLE payment TO srui010;
+GRANT ALL ON TABLE payment TO rendl026;
+GRANT ALL ON TABLE payment TO ajain036;
 
 CREATE TABLE property
 (property_id SERIAL, 
@@ -154,6 +204,10 @@ FOREIGN KEY (address_id) REFERENCES address (address_id)
 CHECK (active IN ('Y', 'N')));
 
 GRANT ALL ON TABLE property TO obore031;
+GRANT ALL ON TABLE property TO tmukt088;
+GRANT ALL ON TABLE property TO srui010;
+GRANT ALL ON TABLE property TO rendl026;
+GRANT ALL ON TABLE property TO ajain036;
 
 CREATE TABLE bed_setup
 (bed_setup_id SERIAL, 
@@ -166,6 +220,10 @@ FOREIGN KEY (property_id) REFERENCES property (property_id)
 CHECK (bed_type IN ('Twin', 'Full', 'Queen', 'King')));
 
 GRANT ALL ON TABLE bed_setup TO obore031;
+GRANT ALL ON TABLE bed_setup TO tmukt088;
+GRANT ALL ON TABLE bed_setup TO srui010;
+GRANT ALL ON TABLE bed_setup TO rendl026;
+GRANT ALL ON TABLE bed_setup TO ajain036;
 
 CREATE TABLE review 
 (review_id SERIAL, 
@@ -186,6 +244,10 @@ CHECK (clean_rating > 0 AND clean_rating <= 5),
 CHECK (value_rating > 0 and value_rating <=5));
 
 GRANT ALL ON TABLE review TO obore031;
+GRANT ALL ON TABLE review TO tmukt088;
+GRANT ALL ON TABLE review TO srui010;
+GRANT ALL ON TABLE review TO rendl026;
+GRANT ALL ON TABLE review TO ajain036;
 
 CREATE TABLE rental_agreement 
 (agreement_id SERIAL, 
@@ -209,6 +271,10 @@ FOREIGN KEY (payment_id) REFERENCES payment(payment_id)
  ON DELETE SET NULL ON UPDATE CASCADE);
  
 GRANT ALL ON TABLE rental_agreement TO obore031;
+GRANT ALL ON TABLE rental_agreement TO tmukt088;
+GRANT ALL ON TABLE rental_agreement TO srui010;
+GRANT ALL ON TABLE rental_agreement TO rendl026;
+GRANT ALL ON TABLE rental_agreement TO ajain036;
 
 CREATE TABLE branch
 (branch_id SERIAL, 
@@ -220,6 +286,10 @@ FOREIGN KEY (address_id) REFERENCES address (address_id)
  ON DELETE RESTRICT ON UPDATE CASCADE);
  
 GRANT ALL ON TABLE branch TO obore031;
+GRANT ALL ON TABLE branch TO tmukt088;
+GRANT ALL ON TABLE branch TO srui010;
+GRANT ALL ON TABLE branch TO rendl026;
+GRANT ALL ON TABLE branch TO ajain036;
 
 CREATE TABLE employee 
 (employee_id SERIAL, 
@@ -237,6 +307,10 @@ FOREIGN KEY (position_id) REFERENCES company_position (position_id)
  ON DELETE RESTRICT ON UPDATE CASCADE);
  
 GRANT ALL ON TABLE employee TO obore031;
+GRANT ALL ON TABLE employee TO tmukt088;
+GRANT ALL ON TABLE employee TO srui010;
+GRANT ALL ON TABLE employee TO rendl026;
+GRANT ALL ON TABLE employee TO ajain036;
  
 ALTER TABLE branch ADD CONSTRAINT branch_manager_fkey
 FOREIGN KEY (branch_manager) REFERENCES employee (employee_id) 
@@ -253,6 +327,10 @@ FOREIGN KEY (rule_id) REFERENCES rules (rule_id)
  ON UPDATE CASCADE ON DELETE CASCADE);
  
 GRANT ALL ON TABLE property_rules TO obore031;
+GRANT ALL ON TABLE property_rules TO tmukt088;
+GRANT ALL ON TABLE property_rules TO srui010;
+GRANT ALL ON TABLE property_rules TO rendl026;
+GRANT ALL ON TABLE property_rules TO ajain036;
 
 CREATE TABLE property_amenities 
 (property_amenity_id SERIAL,
@@ -265,6 +343,10 @@ FOREIGN KEY (amenity_id) REFERENCES amenity (amenity_id)
  ON DELETE CASCADE ON UPDATE CASCADE);
  
 GRANT ALL ON TABLE property_amenities TO obore031;
+GRANT ALL ON TABLE property_amenities TO tmukt088;
+GRANT ALL ON TABLE property_amenities TO srui010;
+GRANT ALL ON TABLE property_amenities TO rendl026;
+GRANT ALL ON TABLE property_amenities TO ajain036;
 
 CREATE VIEW GuestListView AS 
 SELECT g.guest_id, g.email, g.phone_number, n.first_name, n.middle_name, n.last_name,
@@ -273,7 +355,19 @@ FROM guest g
 	JOIN address a ON a.address_id = g.address_id
 	JOIN person_name n ON n.name_id = g.name_id
 	JOIN branch b ON b.country = a.country;
+	
+GRANT ALL ON TABLE GuestListView TO obore031;
+GRANT ALL ON TABLE GuestListView TO tmukt088;
+GRANT ALL ON TABLE GuestListView TO srui010;
+GRANT ALL ON TABLE GuestListView TO rendl026;
+GRANT ALL ON TABLE GuestListView TO ajain036;
 
 CREATE FUNCTION firstNameFirst (firstName VARCHAR(50), lastName VARCHAR(50)) RETURNS VARCHAR(61) AS $$
 SELECT concat(firstName, ' ', lastName);
 $$ LANGUAGE SQL;
+
+GRANT ALL ON FUNCTION firstNameFirst TO obore031;
+GRANT ALL ON FUNCTION firstNameFirst TO tmukt088;
+GRANT ALL ON FUNCTION firstNameFirst TO srui010;
+GRANT ALL ON FUNCTION firstNameFirst TO rendl026;
+GRANT ALL ON FUNCTION firstNameFirst TO ajain036;

@@ -3,14 +3,14 @@
     $conn_string = $_SESSION['conn_string'];
     $dbh = pg_connect($conn_string) or die ('Connection failed.');
 
-	$host_id = $_SESSION['user_id'];
+	$guest_id = $_SESSION['user_id'];
 	
-	$get_info = pg_query("SELECT h.host_id, h.address_id, h.name_id, h.email, h.phone_number, n.first_name, n.last_name, n.middle_name, 
+	$get_info = pg_query("SELECT g.address_id, g.name_id, g.email, g.phone_number, n.first_name, n.last_name, n.middle_name, 
 									a.postal_code, a.street_number, a.unit, a.street_name, a.city, a.province, a.country
-									FROM host h 
-										JOIN person_name n ON h.name_id = n.name_id
-										JOIN address a ON h.address_id = a.address_id
-									WHERE h.host_id = $host_id");
+									FROM guest g
+										JOIN person_name n ON g.name_id = n.name_id
+										JOIN address a ON g.address_id = a.address_id
+									WHERE g.guest_id = $guest_id");
 
     $user_data = pg_fetch_assoc($get_info);
 	$nameID = $user_data['name_id'];
@@ -22,14 +22,13 @@
 		$middleName = $_POST['middleName'];
 		$phoneNum = $_POST['phone'];
 		
-		
 		//Update DB
-		$q1 = pg_query("UPDATE host SET email='$username', phone_number = '$phoneNum' WHERE host_id=$host_id");
+		$q1 = pg_query("UPDATE guest SET email='$username', phone_number = '$phoneNum' WHERE guest_id=$guest_id");
 		
 		$q2 = pg_query("UPDATE person_name SET first_name='$firstName', last_name='$lastName', middle_name='$middleName'
 						WHERE name_id = $nameID"); 
 		
-		header("Location: EditUser.php");
+		header("Location: EditProfile.php");
 	}
 	
 ?>
@@ -46,10 +45,9 @@
         </div>
         <div class="page">
             <nav class="nav flex-column">
-                <a class="nav-link" href="LandingPage.php">My properties</a>
-                <a class="nav-link" href="NewProperty.php">New property</a>
-				<a class="nav-link" href="History.php">History</a>
-				<a class="nav-link" href="#">Edit profile</a>
+                <a class="nav-link" href="SearchProperties.php">Search Properties</a>
+				<a class="nav-link" href="CurrentBookings.php">My Bookings</a>
+				<a class="nav-link" href="#">Edit Profile</a>
             </nav>
             <div class="main-container">
                 <div class="main-container">

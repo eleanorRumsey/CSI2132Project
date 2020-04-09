@@ -1,3 +1,5 @@
+--INSERTION OF STATIC DATA--
+
 INSERT INTO rules (rule_type) 
 VALUES ('No smoking'), ('No pets'), ('No parties');
 

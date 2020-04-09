@@ -83,9 +83,11 @@
         <div class="page">
             <nav class="nav flex-column">
                 <a class="nav-link" href="SearchProperties.php">Search Properties</a>
-                <a class="nav-link" href="#">My Bookings</a>
+				<a class="nav-link" href="CurrentBookings.php">My Bookings</a>
+				<a class="nav-link" href="EditProfile.php">Edit Profile</a>
             </nav>
-            <form class="main-container" method="post" action="">
+            </nav>
+            <form class="main-container" method="post" action="CurrentBookings.php">
                 <h3>Payment</h3>
                 <br/>
                 <?php
@@ -93,10 +95,11 @@
                 ?>
                 <div> 
                     <p>Select your method of payment: </p>
-                    <select class="form-control" name="payment-type">
+                    <select class="form-control" name="payment-type" id="payment-type">
                         <?php
                             foreach($payment_types as $id => $type){
-                                echo '<option value="' . $id . '">' . $type['payment_type'] . '</option>';
+                                $pid = $id +1;
+                                echo '<option value="' . $pid . '">' . $type['payment_type'] . '</option>';
                             }
                         ?>
                     </select>

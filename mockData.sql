@@ -8,7 +8,7 @@ VALUES ('Ellie', NULL, 'Rumsey');
 INSERT INTO host(address_id, name_id, email, phone_number, active) 
 VALUES (1, 1, 'email@gmail.com', '1111111111', 'Y');
 
--- Information for Properties of Host 1 --
+-- Properties of Host 1 --
 INSERT INTO address(postal_code, address_type_id, street_number, unit, street_name, city, province, country)
 VALUES ('X2P4D9', 2, 17, NULL, 'Pine St.', 'Toronto', 'ON', 'Canada');
 
@@ -31,9 +31,51 @@ INSERT INTO bed_setup(property_id, bed_type, num_of_beds) VALUES (2, 'Queen', 1)
 INSERT INTO property_rules(property_id, rule_id) VALUES (2, 3), (2, 1);
 INSERT INTO property_amenities(property_id, amenity_id) VALUES (2, 3), (2, 4), (2, 5);
 
-SELECT * FROM PROPERTY;
+--Host 2--
+INSERT INTO address(postal_code, address_type_id, street_number, unit, street_name, city, province, country)
+VALUES ('14153', 1, 234, 12, 'Park Place', 'New York', 'NY', 'United States');
 
--- Guests --
+INSERT INTO person_name(first_name, middle_name, last_name) 
+VALUES ('Calvin', 'Henry', 'Smith');
+
+INSERT INTO host(address_id, name_id, email, phone_number, active) 
+VALUES (2, 2, 'calvinsmith@host.com', '2837492348', 'Y');
+
+--Properties of Host 2---
+INSERT INTO address(postal_code, address_type_id, street_number, unit, street_name, city, province, country)
+VALUES ('13423', 2, 465, 45, 'Moon Crescent', 'New York', 'NY', 'United States');
+
+INSERT INTO property(property_name, host_id, property_type_id, room_type_id, address_id, guest_capacity, num_bathrooms, 
+					 num_bedrooms, next_available_date, description, rate, active,image)
+VALUES ('Spacious shared loft', 2, 4, 3, 5, 2, 1, 2, '2020-10-11', 'Renting the spare room in my loft.', 129.00, 'Y', 'Loft1.jpg');
+
+INSERT INTO bed_setup(property_id, bed_type, num_of_beds) VALUES (3, 'Queen', 1);
+INSERT INTO property_rules(property_id, rule_id) VALUES (3, 1), (3, 2);
+INSERT INTO property_amenities(property_id, amenity_id) VALUES (3, 2), (3, 3), (3, 4), (3, 5), (3, 6), (3, 7);
+
+INSERT INTO address(postal_code, address_type_id, street_number, unit, street_name, city, province, country)
+VALUES ('A1B2C3', 2, 42, 145, 'Road Rd.', 'Montreal', 'QC', 'Canada');
+
+INSERT INTO property(property_name, host_id, property_type_id, room_type_id, address_id, guest_capacity, num_bathrooms, 
+					 num_bedrooms, next_available_date, description, rate, active,image)
+VALUES ('Rustic Cottage', 2, 3, 1, 6, 6, 3, 3, '2020-04-12', 'A rustic cottage for a scenic getaway.', 234.45, 'Y', 'Cottage1.jpg');
+
+INSERT INTO bed_setup(property_id, bed_type, num_of_beds) VALUES (4, 'Twin', 2), (4, 'Queen', 2);
+INSERT INTO property_rules(property_id, rule_id) VALUES (4, 3), (4, 2), (4, 1);
+INSERT INTO property_amenities(property_id, amenity_id) VALUES (4, 1), (4, 3), (4, 5);
+
+
+-- Guest 1 --
+INSERT INTO address(postal_code, address_type_id, street_number, unit, street_name, city, province, country)
+VALUES ('H5H3H3', 1, 12, 235, 'Purple St.', 'Ottawa', 'ON', 'Canada');
+
+INSERT INTO person_name(first_name, middle_name, last_name) 
+VALUES ('G.', 'NULL', 'Guest');
+
+INSERT INTO guest(address_id, name_id, email, phone_number)
+VALUES(7, 3,'guest@gmail.com', '3948203984');
+
+-- Guest 2 --
 INSERT INTO address(postal_code, address_type_id, street_number, unit, street_name, city, province, country)
 VALUES ('G0G0G0', 1, 5, 14, 'Red Rd.', 'Moncton', 'NB', 'Canada');
 
@@ -41,7 +83,7 @@ INSERT INTO person_name(first_name, middle_name, last_name)
 VALUES ('Charlie', 'Alpha', 'Omega');
 
 INSERT INTO guest(address_id, name_id, email, phone_number)
-VALUES(4, 2,'charlieo@gmail.com', '6133456549');
+VALUES(8, 2,'charlieo@gmail.com', '6133456549');
 
 -- Branches and employees --
 WITH a_id AS 
@@ -72,17 +114,59 @@ WITH manager_name AS(INSERT INTO person_name(first_name, middle_name, last_name)
 UPDATE branch SET branch_manager =(SELECT employee_id FROM manager_id) 
 	WHERE branch_id = (SELECT branch_id FROM branch WHERE country = 'United States');
 
---Reviews--
-select * from property;
+--Bookings and Reviews--
+INSERT INTO payment(host_id, guest_id, payment_type_id, amount, status)
+VALUES (1, 1, 4, 500, 'Approved');
+
+INSERT INTO rental_agreement(property_id, guest_id, host_id, document_link, signed, signing_date, start_date, end_date, payment_id)
+VALUES(1, 1, 1,'https://docs.google.com/document/d/1WjeVaITTmj7MrJcuwJwEFEogbVrSPb5332LHaNLaba8/edit?usp=sharing', TRUE, 
+	  '2020-01-04', '2020-02-02', '2020-02-04', 1);
 
 INSERT INTO review(guest_id, property_id, overall_rating, communication_rating, clean_rating, value_rating)
 VALUES(1, 1, 4, 5, 4, 4);
 
+
+INSERT INTO payment(host_id, guest_id, payment_type_id, amount, status)
+VALUES (1, 1, 3, 270, 'Approved');
+
+INSERT INTO rental_agreement(property_id, guest_id, host_id, document_link, signed, signing_date, start_date, end_date, payment_id)
+VALUES(2, 1, 1,'https://docs.google.com/document/d/1WjeVaITTmj7MrJcuwJwEFEogbVrSPb5332LHaNLaba8/edit?usp=sharing', TRUE, 
+	  '2020-03-01', '2020-03-10', '2020-03-11', 2);
+
 INSERT INTO review(guest_id, property_id, overall_rating, communication_rating, clean_rating, value_rating)
 VALUES(1, 2, 3, 3, 5, 4);
 
-INSERT INTO review(guest_id, property_id, overall_rating, communication_rating, clean_rating, value_rating)
-VALUES(2, 1, 3, 3, 3, 2);
+
+INSERT INTO payment(host_id, guest_id, payment_type_id, amount, status)
+VALUES (2, 1, 2, 456, 'Approved');
+
+INSERT INTO rental_agreement(property_id, guest_id, host_id, document_link, signed, signing_date, start_date, end_date, payment_id)
+VALUES(3, 1, 2,'https://docs.google.com/document/d/1WjeVaITTmj7MrJcuwJwEFEogbVrSPb5332LHaNLaba8/edit?usp=sharing', TRUE, 
+	  '2020-02-21', '2020-02-23', '2020-02-25', 3);
 
 INSERT INTO review(guest_id, property_id, overall_rating, communication_rating, clean_rating, value_rating)
-VALUES(2, 2, 4, 4, 4, 4);
+VALUES(1, 3, 5, 5, 4, 5);
+
+
+INSERT INTO payment(host_id, guest_id, payment_type_id, amount, status)
+VALUES (1, 2, 4, 372, 'Approved');
+
+INSERT INTO rental_agreement(property_id, guest_id, host_id, document_link, signed, signing_date, start_date, end_date, payment_id)
+VALUES(1, 2, 1,'https://docs.google.com/document/d/1WjeVaITTmj7MrJcuwJwEFEogbVrSPb5332LHaNLaba8/edit?usp=sharing', TRUE, 
+	  '2020-02-25', '2020-02-26', '2020-02-28', 4);
+
+INSERT INTO review(guest_id, property_id, overall_rating, communication_rating, clean_rating, value_rating)
+VALUES(2, 1, 4, 3, 4, 5);
+
+
+INSERT INTO payment(host_id, guest_id, payment_type_id, amount, status)
+VALUES (2, 2, 4, 467, 'Approved');
+
+INSERT INTO rental_agreement(property_id, guest_id, host_id, document_link, signed, signing_date, start_date, end_date, payment_id)
+VALUES(3, 2, 2,'https://docs.google.com/document/d/1WjeVaITTmj7MrJcuwJwEFEogbVrSPb5332LHaNLaba8/edit?usp=sharing', TRUE, 
+	  '2020-03-30', '2020-04-02', '2020-04-06', 5);
+
+INSERT INTO review(guest_id, property_id, overall_rating, communication_rating, clean_rating, value_rating)
+VALUES(2, 4, 3, 3, 3, 2);
+
+

@@ -14,7 +14,7 @@
                             JOIN property_type pt ON pt.property_type_id = p.property_type_id
                             JOIN address ad ON ad.address_id = p.address_id
                             JOIN address_type adt ON adt.address_type_id = ad.address_type_id
-                            JOIN (SELECT property_id, avg(overall_rating) as avg_ovr, avg(communication_rating) as avg_comm, 
+                            LEFT JOIN (SELECT property_id, avg(overall_rating) as avg_ovr, avg(communication_rating) as avg_comm, 
                                 avg(clean_rating) as avg_clean, avg(value_rating) as avg_val FROM review GROUP BY property_id) 
                                 as rev_avg on rev_avg.property_id = p.property_id
                         WHERE p.host_id = $host_id");
@@ -47,6 +47,7 @@
                 <a class="nav-link" href="#">My properties</a>
                 <a class="nav-link" href="NewProperty.php">New property</a>
                 <a class="nav-link" href="History.php">History</a>
+                <a class="nav-link" href="EditUser.php">Edit profile</a>
             </nav>
             <div class="main-container">
                 <?php
@@ -104,7 +105,6 @@
                                     </div>
                                     <div class="address-date">
                                         <p> Available: '. $array["next_available_date"] .'</p>
-                                        <br/>
                                         <br/>
                                         <h5>'. $array['unit'] .' '. $array['street_number'] .' '. $array['street_name'] .'</h5>
                                         <h5>'. $array['city'] .', '. $array['province'] .', '. $array['country'] .'</h5>
